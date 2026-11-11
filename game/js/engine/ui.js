@@ -44,6 +44,8 @@ UI.layout = function(){
   else { stage.style.left = L.x+'px'; stage.style.top = L.y+'px'; stage.style.transform = ''; }
   stage.className = 'm-'+mode+(UI.touch ? ' t' : ' p')+(MA.settings.bigText ? ' big' : '')+(MA.settings.readable ? ' readable' : '');
   stage.style.setProperty('--u', u+'px');
+  if (mode === 'rails'){ var sw = 320*u, slot = Math.max(40, Math.min(60, Math.floor((sw-240-96)/6)));
+    stage.style.setProperty('--rw', railW+'px'); stage.style.setProperty('--rh', rowH+'px'); stage.style.setProperty('--sw', sw+'px'); stage.style.setProperty('--sh', (144*u)+'px'); stage.style.setProperty('--slot', slot+'px'); }
   var sx = mode === 'std' ? 0 : railW;
   L.sx = sx; L.sy = 0;
   var sc = $('scene'); sc.style.left = sx+'px'; sc.style.top = '0px'; sc.style.width = (320*u)+'px'; sc.style.height = (144*u)+'px';
@@ -109,12 +111,12 @@ UI.refreshLabel = function(){ var lab = $('label'); if (!lab) return; if (touchV
 
 // ---------------------------------------------------------------- Verben
 var touchVerbs = null;   // {hs, verbs} solange die Leiste Verbknöpfe zeigt
-UI.closeVerbs = function(){ var vp = $('verbpop'); vp.innerHTML = ''; vp.classList.remove('on'); touchVerbs = null; E.selectedHs = null; UI.refreshLabel(); };
+UI.closeVerbs = function(){ var vp = $('verbpop'); vp.innerHTML = ''; vp.classList.remove('on'); touchVerbs = null; E.selectedHs = null; var lab = $('label'); if (lab) lab.classList.remove('big-v'); UI.refreshLabel(); };
 UI.verbsOpen = function(){ return !!touchVerbs || $('verbpop').classList.contains('on'); };
 UI.openVerbs = function(h, sx, sy){ var verbs = MA.verbsOf(h); var name = E.hsName(h);
   if (verbs.length === 1 && verbs[0] === 'look'){ UI.closeVerbs(); MA.doVerb('look', h); return; }
   E.selectedHs = h;
-  if (UI.touch){ touchVerbs = { hs: h, verbs: verbs }; var lab = $('label'); lab.innerHTML = '';
+  if (UI.touch){ touchVerbs = { hs: h, verbs: verbs }; var lab = $('label'); lab.innerHTML = ''; lab.classList.add('big-v');
     lab.appendChild(el('span', 'lt nm', esc(name)));
     verbs.forEach(function(v){ var b = el('button', 'btn vb', esc(MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); MA.doVerb(v, h); }; lab.appendChild(b); });
     var x = el('button', 'btn bx', '✕'); x.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); }; lab.appendChild(x);

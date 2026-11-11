@@ -80,7 +80,7 @@ async function nedimTalk(A){ var N = A.npc('nedim');
     A.note('n_murmel'); if (!F('know.dragan')){ await N.say('Dragan ist an der Brücke. Er wartet auf seinen Ball. Und auf die Murmel.'); A.set('know.dragan'); A.note('n_dragan'); } }
   await A.menu(function(){ return [
     { t: 'Du hältst das Bankende. Ich hole sie heraus.', if: !F('nedim.agreed'), go: async function(){ await N.say('Und wenn sie weiter hineinrollt?'); await A.say('Darum bereite ich unten etwas zum Auffangen vor.'); await N.say('Gut. Dragan glaubt mir beim zweiten Mal gar nichts mehr.'); A.set('nedim.agreed');
-        if (F('heft.placed')) await nedimLift(A); else await N.say('Sag Bescheid, wenn unten etwas liegt.'); } },
+        if (F('heft.placed')) return nedimLift(A); await N.say('Sag Bescheid, wenn unten etwas liegt.'); } },
     { t: 'Unten liegt jetzt etwas. Heb an.', if: F('nedim.agreed') && !F('nedim.holds') && F('heft.placed'), go: nedimLift },
     { t: 'Ich sage Dragan, dass du geholfen hast.', once: 'n.tell', go: async function(){ await N.say('Auch, dass ich wusste, wo sie war?'); await A.say('Das scheint dir wichtig zu sein.'); await N.say('Das ist der einzige Teil, bei dem ich recht habe.'); } },
     { t: 'Du achtest darauf, dass alle auf das Zeichen warten.', if: F('probe.failed1') && !F('role.nedim'), go: nedimRole },
@@ -155,7 +155,7 @@ MA.defineRoom({ id: 'hof', name: 'Schulhof', width: K.W,
     { id: 'nedim', npc: 'nedim', hgt: 40, talk: nedimTalk, look: 'Nedim. Er sieht aus, als hätte er gleich etwas falsch gemacht. Er hat noch nichts gemacht.' },
     { id: 'bank', name: 'Bank', r: [262, 108, 60, 14], st: [292, 132, 'B'], tp: [290, 114], look: benchLook, take: benchTake, use: 'Ich setze mich nicht. Wer sitzt, wird noch leichter übersehen.', on: { '*': benchUse } },
     { id: 'tafel', name: 'Probetafel', r: [12, 64, 52, 32], st: [38, 124, 'B'], look: boardLook, read: boardLook, use: function(A){ return boardUse(A, null); }, on: { '*': boardUse } },
-    { id: 'kinder', name: 'Klassenkameraden', r: [70, 80, 66, 46], pri: 3, look: 'Meine Klasse. Saubere Hände, ordentliche Hemden, Fähnchen. Sie wissen, wo sie stehen.',
+    { id: 'kinder', name: 'Klassenkameraden', r: [70, 80, 66, 46], tp: [118, 110], pri: 3, look: 'Meine Klasse. Saubere Hände, ordentliche Hemden, Fähnchen. Sie wissen, wo sie stehen.',
       talk: async function(A){ await A.line('kind', A.cycle('kids', ['Hast du kein Fähnchen? Branko gibt dir keins, oder?', 'Mein Vater sagt, Tiko winkt nur zurück, wenn man richtig winkt.', 'Wenn das noch lange dauert, wird mein Hemd wieder dreckig.', 'Dragan ist schon weg. Branko hat es noch nicht gemerkt.', F('probe.ok') ? 'Diesmal haben wir nur das Richtige gerufen. Komisches Gefühl.' : 'Wir sollen rufen, was auf der Tafel steht. Das tun wir doch.'])); } },
     { id: 'banner', name: 'Transparent', r: [22, 46, 150, 10], look: '„ŽIVIO DRUG TIKO“ – weiße Buchstaben auf rotem Stoff. Jemand hat sehr gerade geschrieben.', read: '„ŽIVIO DRUG TIKO“. Drug, nicht drugi. Wer das Transparent gemalt hat, hatte die richtige Vorlage.' },
     { id: 'fahne_haus', name: 'Fahne', r: [100, 2, 18, 12], look: 'Die Fahne über der Tür: blau, weiß, rot, ein roter Stern. Sie bewegt sich nur, wenn Wind ist. Wie Branko.' },
