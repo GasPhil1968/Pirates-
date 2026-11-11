@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><title>App-Icon M. Adventure</title>
+<style>body{background:#333;margin:0;padding:8px} canvas{image-rendering:pixelated;margin:4px}</style></head>
+<body>
+<script src="../game/js/lib/mala_core.js"></script><script src="../game/js/lib/mala_art.js"></script>
+<script>
+// App-Icon 64×64 Spielpixel in der Spielpalette: Abenddämmerung, Brückenbogen über der Neretva, „M.“ in der Pixelschrift (dreifach vergrößert).
+(function(){ var P = M.P, R = M.R, S = 64;
+  window.paintIcon = function(){ var b = new M.Buf(S, S, P.k0);
+    M.sky(b, 0, 0, S, 46, 'dusk', 3);
+    for (var x = 0; x < S; x++){ var h = Math.round(31+Math.sin(x*0.17)*2+Math.sin(x*0.06+1)*3); for (var y = h; y < 46; y++) b.px(x, y, (x+y) % 7 === 0 ? P.d0 : P.k1); }
+    // Neretva: dunkles Wasser mit waagrechten Lichtstreifen unter dem Bogen
+    for (var y2 = 46; y2 < S; y2++) for (var x2 = 0; x2 < S; x2++){ var v = 0.25+Math.sin(x2*0.21+y2*0.7)*0.1+(y2-46)/18*0.35; b.px(x2, y2, M.rampAt(R('k0 k1 a0 a1'), v, x2, y2)); }
+    [[24, 50, 5], [33, 52, 4], [27, 55, 6], [36, 57, 3], [22, 60, 4], [31, 61, 5]].forEach(function(g){ for (var q = 0; q < g[2]; q++) b.px(g[0]+q, g[1], q === 0 || q === g[2]-1 ? P.d3 : P.d5); });
+    // Steinbogen: Fahrbahn steigt zur Mitte an, Bogenunterseite als Kante, Zwickel dunkel gegen den hellen Himmel
+    for (var x3 = 0; x3 < S; x3++){ var t = (x3-32)/34, deck = Math.round(35+t*t*9), intra = Math.round(41+t*t*30);
+      for (var y3 = deck-2; y3 <= Math.min(S-1, intra); y3++){ var c3 = y3 < deck ? P.d2 : (y3 === deck ? P.d5 : (y3 >= intra-1 ? P.d3 : M.tex.ashlar(x3, y3, R('k1 k2 d0 d1'), 8, 4))); b.px(x3, y3, c3); } }
+    // Türme an beiden Ufern
+    [[0, 9], [55, 9]].forEach(function(tw){ for (var y4 = 28; y4 < S; y4++) for (var x4 = tw[0]; x4 < tw[0]+tw[1]; x4++) b.px(x4, y4, M.tex.ashlar(x4, y4, R('k0 k1 k2 d0'), 6, 3));
+      b.poly([[tw[0]-1, 28], [tw[0]+tw[1]+1, 28], [tw[0]+tw[1]/2, 22]], P.k1); b.rect(tw[0]+3, 34, 2, 3, P.y3); });
+    var t1 = new M.Buf(16, 9, 255); M.text(t1, 'M.', 1, 1, 1);
+    var tw = M.textWidth('M.'), ox = Math.round((S-tw*3)/2)-3, oy = 4;
+    for (var yy = 0; yy < 9; yy++) for (var xx = 0; xx < 16; xx++) if (t1.get(xx, yy) === 1){ for (var a = -1; a <= 3; a++) for (var c = -1; c <= 3; c++) b.px(ox+xx*3+c, oy+yy*3+a, P.k0); }
+    for (var yy2 = 0; yy2 < 9; yy2++) for (var xx2 = 0; xx2 < 16; xx2++) if (t1.get(xx2, yy2) === 1){ for (var a2 = 0; a2 < 3; a2++) for (var c3 = 0; c3 < 3; c3++) b.px(ox+xx2*3+c3, oy+yy2*3+a2, a2 === 0 ? P.y5 : P.y4); }
+    return b; };
+  // Puffer → Canvas (1:1), dann ganzzahlig vergrößert als PNG-Daten-URL
+  function toCanvas(buf){ var c = document.createElement('canvas'); c.width = buf.w; c.height = buf.h; var g = c.getContext('2d'), img = g.createImageData(buf.w, buf.h);
+    for (var i = 0; i < buf.d.length; i++){ var q = M.RGB[buf.d[i]] || [255, 0, 255], k = i*4; img.data[k] = q[0]; img.data[k+1] = q[1]; img.data[k+2] = q[2]; img.data[k+3] = 255; } g.putImageData(img, 0, 0); return c; }
+  window.iconPNG = function(size, crop, scale){ var src = toCanvas(window.paintIcon()), c = document.createElement('canvas'); c.width = size; c.height = size; var g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.drawImage(src, crop, crop, S-2*crop, S-2*crop, 0, 0, (S-2*crop)*scale, (S-2*crop)*scale); document.body.appendChild(c); return c.toDataURL('image/png'); };
+})();
+</script></body></html>

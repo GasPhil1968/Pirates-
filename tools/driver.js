@@ -23,12 +23,14 @@ class Driver {
   async st() { return this.page.evaluate(() => MADV.state()); }
   async flags() { return this.page.evaluate(() => MADV.flags()); }
   async tap(x, y) { if (this.touch) await this.page.touchscreen.tap(x, y); else await this.page.mouse.click(x, y); }
+  // DOM-Element bedienen: mit dem Finger antippen (Touch-Gerät) bzw. mit der Maus klicken
+  async press(loc) { if (this.touch) await loc.tap(); else await loc.click(); }
   async shot(name) { if (!this.shots) return; this.n++; await this.page.screenshot({ path: `${this.shots}/${String(this.n).padStart(3, '0')}_${name}.png` }); }
   // Szene weiterklicken, bis nichts mehr läuft (Antwortliste oder Rätsel beenden das Warten)
   async idle(opt = {}) { const t0 = Date.now(); let lastSpeech = null;
     for (;;) { const s = await this.st();
       if (Date.now() - t0 > (opt.timeout || 60000)) throw new Error('idle timeout ' + JSON.stringify(s));
-      if (s.modal === 'card') { await this.page.locator('.card').click(); await this.page.waitForTimeout(450); continue; }
+      if (s.modal === 'card') { await this.press(this.page.locator('.card')); await this.page.waitForTimeout(450); continue; }
       if (s.modal && s.modal !== 'title') return s;
       if (s.dlg) return s;
       if (s.speech) { if (s.speech !== lastSpeech) { this.log.push(`[${s.who}] ${s.speech}`); lastSpeech = s.speech; } const r = await this.page.evaluate(() => MADV.sceneRect()); await this.tap(r.x + 8, r.y + r.h - 8); await this.page.waitForTimeout(230); continue; }
@@ -43,28 +45,31 @@ class Driver {
   async verb(id, label) { await this.idle(); await this.clickHs(id);
     const sel = this.touch ? '#label .vb' : '#verbpop .pv';
     const btn = this.page.locator(sel, { hasText: label });
-    if (await btn.count()) { await btn.first().click(); }
+    if (await btn.count()) { await this.press(btn.first()); }
     else if (label !== 'Schau an') { const have = await this.page.locator(sel).allTextContents(); throw new Error(`Verb "${label}" an ${id} fehlt (vorhanden: ${have.join(', ')})`); }
     await this.page.waitForTimeout(120); return this.idle(); }
   async look(id) { return this.verb(id, 'Schau an'); }
   async talk(id) { return this.verb(id, 'Rede mit'); }
   async choose(part) { await this.page.waitForTimeout(260); const b = this.page.locator('#choices .co', { hasText: part }); if (!(await b.count())) { const all = await this.page.locator('#choices .co').allTextContents(); throw new Error(`Antwort "${part}" fehlt: ${all.join(' / ')}`); }
-    this.log.push(`  > ${part}`); await b.first().click(); await this.page.waitForTimeout(150); return this.idle(); }
-  async chooseIdx(i) { await this.page.waitForTimeout(260); const b = this.page.locator('#choices .co').nth(i); this.log.push(`  > #${i} ${await b.textContent()}`); await b.click(); await this.page.waitForTimeout(150); return this.idle(); }
-  async bye() { const s = await this.st(); if (!s.dlg) return s; const b = this.page.locator('#choices .co.bye'); if (await b.count()) { await this.page.waitForTimeout(260); await b.first().click(); await this.page.waitForTimeout(150); } return this.idle(); }
+    this.log.push(`  > ${part}`); await this.press(b.first()); await this.page.waitForTimeout(150); return this.idle(); }
+  async chooseIdx(i) { await this.page.waitForTimeout(260); const b = this.page.locator('#choices .co').nth(i); this.log.push(`  > #${i} ${await b.textContent()}`); await this.press(b); await this.page.waitForTimeout(150); return this.idle(); }
+  async bye() { const s = await this.st(); if (!s.dlg) return s; const b = this.page.locator('#choices .co.bye'); if (await b.count()) { await this.page.waitForTimeout(260); await this.press(b.first()); await this.page.waitForTimeout(150); } return this.idle(); }
   // Gegenstand im Inventar finden (blättern) und anklicken
   async slot(item) { for (let k = 0; k < 8; k++) { const s = this.page.locator(`#inv .slot[data-item="${item}"]`); if (await s.count()) return s.first();
-      const nx = this.page.locator('#inv-next'); if (await nx.isDisabled()) { const pv = this.page.locator('#inv-prev'); for (let j = 0; j < 8 && !(await pv.isDisabled()); j++) { await pv.click(); } if (k > 0) break; } else await nx.click(); await this.page.waitForTimeout(60); }
+      const nx = this.page.locator('#inv-next'); if (await nx.isDisabled()) { const pv = this.page.locator('#inv-prev'); for (let j = 0; j < 8 && !(await pv.isDisabled()); j++) { await this.press(pv); } if (k > 0) break; } else await this.press(nx); await this.page.waitForTimeout(60); }
     const inv = (await this.st()).inv; throw new Error(`Gegenstand ${item} nicht im Inventar (${inv.join(', ')})`); }
-  async select(item) { await this.idle(); const s = await this.slot(item); await s.click(); await this.page.waitForTimeout(150); }
+  async select(item) { await this.idle(); const s = await this.slot(item); await this.press(s); await this.page.waitForTimeout(150); }
   async useOn(item, id) { await this.idle(); await this.ensureVisible(id); await this.select(item); const p = await this.page.evaluate((i) => MADV.hsScreen(i), id); await this.tap(p.x, p.y); await this.page.waitForTimeout(200); return this.idle(); }
-  async combine(a, b) { await this.select(a); const s = await this.slot(b); await s.click(); await this.page.waitForTimeout(200); return this.idle(); }
-  async useSelf(a) { await this.select(a); await this.page.locator('#b-self').click(); await this.page.waitForTimeout(200); return this.idle(); }
-  async itemVerb(item, label) { await this.select(item); await this.page.locator('#verbpop .pv', { hasText: label }).first().click(); await this.page.waitForTimeout(200); return this.idle(); }
+  async combine(a, b) { await this.select(a); const s = await this.slot(b); await this.press(s); await this.page.waitForTimeout(200); return this.idle(); }
+  async useSelf(a) { await this.select(a); await this.press(this.page.locator('#b-self')); await this.page.waitForTimeout(200); return this.idle(); }
+  // Gegenstand wählen, ein zweites Mal antippen (öffnet das kleine Menü) und die Handlung wählen
+  async itemVerb(item, label) { await this.select(item); const s = await this.slot(item); await this.press(s); await this.page.waitForTimeout(200);
+    const b = this.page.locator('#verbpop .pv', { hasText: label }); if (!(await b.count())) throw new Error(`Handlung "${label}" für ${item} fehlt: ` + (await this.page.locator('#verbpop .pv').allTextContents()).join(', '));
+    await this.press(b.first()); await this.page.waitForTimeout(200); return this.idle(); }
   async exit(id, room) { await this.idle(); await this.clickHs(id); await this.page.waitForTimeout(300); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Ausgang ${id}: erwartet ${room}, bin in ${s.room}`); return s; }
-  async mapTo(name, room) { await this.idle(); await this.page.locator('#b-map').click(); await this.page.waitForTimeout(400); await this.page.locator('.mloc', { hasText: name }).first().click(); await this.page.waitForTimeout(500); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Karte ${name}: erwartet ${room}, bin in ${s.room}`); return s; }
-  async puzzle(...labels) { for (const l of labels) { const b = this.page.locator('.puzzle .pb', { hasText: l }); if (!(await b.count())) { const all = await this.page.locator('.puzzle .pb').allTextContents(); throw new Error(`Rätselknopf "${l}" fehlt: ${all.join(' / ')}`); } await b.first().click(); await this.page.waitForTimeout(260); } await this.page.waitForTimeout(1900); return this.idle(); }
-  async closeDoc() { const s = await this.st(); if (s.modal === 'doc') { await this.page.locator('.modal.doc .row.back').click(); await this.page.waitForTimeout(250); } return this.idle(); }
+  async mapTo(name, room) { await this.idle(); await this.press(this.page.locator('#b-map')); await this.page.waitForTimeout(400); await this.press(this.page.locator('.mloc', { hasText: name }).first()); await this.page.waitForTimeout(500); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Karte ${name}: erwartet ${room}, bin in ${s.room}`); return s; }
+  async puzzle(...labels) { for (const l of labels) { const b = this.page.locator('.puzzle .pb', { hasText: l }); if (!(await b.count())) { const all = await this.page.locator('.puzzle .pb').allTextContents(); throw new Error(`Rätselknopf "${l}" fehlt: ${all.join(' / ')}`); } await this.press(b.first()); await this.page.waitForTimeout(260); } await this.page.waitForTimeout(1900); return this.idle(); }
+  async closeDoc() { const s = await this.st(); if (s.modal === 'doc') { await this.press(this.page.locator('.modal.doc .row.back')); await this.page.waitForTimeout(250); } return this.idle(); }
   async expectFlag(k, v = true) { const f = await this.flags(); if ((v === true && !f[k]) || (v !== true && f[k] !== v)) throw new Error(`Flag ${k} erwartet ${v}, ist ${f[k]}`); }
   async expectItem(i, has = true) { const s = await this.st(); if (has !== s.inv.includes(i)) throw new Error(`Gegenstand ${i} ${has ? 'fehlt' : 'unerwartet vorhanden'} (${s.inv.join(', ')})`); }
 }

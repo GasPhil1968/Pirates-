@@ -36,9 +36,10 @@ Verbindlich für alle Grafiken von M. Adventure. Grundlage sind die untersuchten
 - Schrift in der Szene nur als Mikroschrift (Schilder, Ablagen, Plakat); lesbarer Text erscheint im Dokument-Fenster.
 
 ## Darstellung von Dialogen, Inventar, Menüs, Karte
-- **Sprechen:** Kasten oben in der Szene, Rahmen `s6`, Text in der Sprecherfarbe; Porträt 56 × 64 neben dem Kasten (Figur links, M. rechts), Mund offen beim Sprechen, Lidschlag in Pausen. Erzähltext ohne Kasten, zentriert, hell mit dunklem Rand.
-- **Antworten:** Liste über der Leiste, Ziffern, bereits Gefragtes grau, „Tschüss“-Zeilen ocker.
-- **Inventar:** sechs Felder je Seite, Symbole 32 × 24 aus der Palette, gewählter Gegenstand mit Ockerrahmen, neue Gegenstände blinken kurz.
+- **Sprechen:** Kasten oben in der Szene, Rahmen `s6`, Text in der Sprecherfarbe; Porträt 56 × 64 neben dem Kasten auf der Seite des Sprechers (M. rechts; andere Figuren links, oder rechts, wenn sie in der Szene rechts von M. stehen; rechts stehende Porträts gespiegelt wie in MALA), Mund offen beim Sprechen, Lidschlag in Pausen. Erzähltext ohne Kasten, zentriert, hell mit dunklem Rand.
+- **Antworten:** Liste über der Leiste, Ziffern, bereits Gefragtes grau, „Tschüss“-Zeilen ocker; passt die Liste nicht ganz, zeigt „▼ weitere Antworten“ an, dass gescrollt werden kann.
+- **Inventar:** sechs Felder je Seite, Symbole 32 × 24 aus der Palette, gewählter Gegenstand mit Ockerrahmen, neue Gegenstände blinken kurz. Erster Tipp wählt („Benutze … mit …“, die Szene bleibt frei), zweiter Tipp oder „Ansehen“ öffnet das kleine Menü (Schau an/Lies/Öffne/Benutze); Rechtsklick zeigt den Gegenstand direkt.
+- **Fenster:** ✕ oben rechts bleibt beim Scrollen sichtbar; Tippen neben ein Fenster schließt es (nicht bei Vollbild-Ebenen wie Rätseln).
 - **Menüs:** Kästen `k1` mit Ockerrahmen `y2`, Text `s5`, Auswahl `y4/y5`.
 - **Karte:** handgezeichneter Stadtplan in Papiertönen; nur bekannte Orte; hier = gelb, gesperrt = grau mit Grund.
 

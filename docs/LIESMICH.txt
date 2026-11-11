@@ -1,0 +1,57 @@
+M. ADVENTURE – KAPITEL MOSTAR 1955: „DER GENOSSE KOMMT!“
+Browser-Fassung, deutsch · Fassung {FASSUNG}
+
+WORUM ES GEHT
+Mostar, 1955. Die Schule probt für den Besuch des Genossen Tiko. M., dreizehn,
+aus Rosko Polje, steht auf keiner Liste: Für Branko, den Ordner mit dem
+Klemmbrett, gibt es ihn nicht. Um mitzumachen, muss M. sich einen Platz
+verschaffen – über den Lehrer, den Markt, die Brücke und die Absperrung.
+Ein abgeschlossenes Kapitel; Spieldauer geschätzt 1½ bis 2½ Stunden
+(Schätzung, nicht mit Testpersonen gemessen). Ohne Ton, wie im Spielkonzept
+für die Browserfassung vorgesehen.
+
+STARTEN
+- Am Rechner: index.html in einem aktuellen Browser öffnen (automatisch
+  geprüft mit Chromium). Es wird nichts installiert und nichts nachgeladen.
+- Netlify (Upload nur, wenn Sie es selbst wollen – nichts ist veröffentlicht):
+  ZIP entpacken, app.netlify.com/drop öffnen und den entpackten Ordner
+  hineinziehen. Netlify zeigt danach eine https-Adresse.
+- iPad/Telefon offline: die https-Adresse in Safari öffnen und warten, bis
+  unten links auf dem Titelbild „Offline bereit ✓“ steht. Dann Teilen ->
+  „Zum Home-Bildschirm“. Danach startet das Spiel auch ohne Internet.
+  Neue Fassung: erneut zu derselben Netlify-Seite hochladen und das Spiel
+  einmal mit Internet öffnen; es lädt sich auf dem Titelbild neu.
+  Welche Fassung läuft, steht unten links auf dem Titelbild.
+- Gespielt wird quer. Im Hochformat erscheint ein Hinweis mit
+  „Gedreht weiterspielen“ (für Geräte mit Drehsperre).
+
+BEDIENUNG
+- Antippen/Klicken: M. sieht sich eine Stelle an. Kann man mehr damit tun,
+  erscheinen genau diese Handlungen (Maus: Menü am Zeiger, Finger: große
+  Knöpfe). Boden antippen: hingehen. Ausgang zweimal antippen: sofort hin.
+- Gegenstand antippen -> „Benutze … mit …“ -> Ziel antippen (Stelle, Person,
+  anderer Gegenstand oder M.s Bild). Gegenstände lassen sich auch ziehen.
+- Notizen: was M. gerade beschäftigt (keine Lösungen). Karte: bekannte Orte.
+  Zeigen: markiert kurz alle Stellen im Bild.
+- Tastatur: Esc Menü/Schließen · Leertaste/Enter weiter · 1–9 Antworten ·
+  N Notizen · K Karte · Z Zeigen · I Inventar blättern. Rechtsklick = Ansehen.
+
+SPIELSTÄNDE
+- Automatisch bei jedem Ortswechsel, an wichtigen Stellen und beim Verlassen
+  der Seite; dazu fünf Speicherplätze im Menü. „Fortsetzen“ auf dem Titelbild
+  zeigt kurz, wo man war und was offen ist.
+- Gespeichert wird im Browser (localStorage, Schlüssel „madv.v1.…“), getrennt
+  von MALA/„Die Stillen“. Wer die Browserdaten löscht, löscht die Spielstände.
+  Ein Export/Import von Spielständen gibt es in dieser Fassung nicht.
+
+INHALT
+index.html            Spiel (lädt js/, css/, fonts/)
+js/lib/               Grafik- und Figurentechnik aus MALA (Palette, Malkasten, Rig)
+js/engine/            Engine von M. Adventure (Räume, Skripte, Oberfläche, Spielstände)
+js/art/, js/content/  Grafik und Inhalte des Kapitels Mostar
+css/, fonts/          Gestaltung und Schriften (Pixel-Schrift, Atkinson Hyperlegible)
+sw.js, manifest.webmanifest, icon-*.png   Offline-Fassung und App-Symbol
+
+Entwicklerdokumentation (Quellenanalyse, Kapitelentwurf, Prüfbericht,
+Lösungsweg) liegt bewusst nicht in diesem Ordner, sondern im Projektarchiv
+unter docs/, damit sie nicht mit dem Spiel veröffentlicht wird.

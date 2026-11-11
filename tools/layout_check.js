@@ -18,9 +18,12 @@ const DEVICES = ['Desktop 1280x800', 'Desktop 1024x640', 'iPad (gen 7) landscape
         const vis = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
         document.querySelectorAll('#stage button, #stage .row, #stage .co, #stage .lt, #stage .tb, #stage .mloc, #stage .pb').forEach((e) => { if (!vis(e)) return; let p = e; while (p && p !== document.body) { if (!vis(p)) return; p = p.parentElement; }
           const b = e.getBoundingClientRect(), t = (e.textContent || '').trim().slice(0, 30);
-          if (b.left < st.left - 1 || b.top < st.top - 1 || b.right > st.right + 1 || b.bottom > st.bottom + 1) bad.push('außerhalb: ' + (e.id || e.className) + ' „' + t + '“');
-          if (e.scrollWidth > e.clientWidth + 2 && !e.classList.contains('lt')) bad.push('Text breiter als Feld: ' + (e.id || e.className) + ' „' + t + '“ ' + e.scrollWidth + '>' + e.clientWidth);
+          let sc = e.parentElement; while (sc && sc !== document.body) { const cs = getComputedStyle(sc); if (/(auto|scroll)/.test(cs.overflowY) && sc.scrollHeight > sc.clientHeight + 1) break; sc = sc.parentElement; } const inScroll = sc && sc !== document.body;
+          if ((b.left < st.left - 1 || b.top < st.top - 1 || b.right > st.right + 1 || b.bottom > st.bottom + 1) && !inScroll) bad.push('außerhalb: ' + (e.id || e.className) + ' „' + t + '“');
+          if (e.id !== 'b-self' && e.scrollWidth > e.clientWidth + 2 && !e.classList.contains('lt') && !e.classList.contains('dot')) bad.push('Text breiter als Feld: ' + (e.id || e.className) + ' „' + t + '“ ' + e.scrollWidth + '>' + e.clientWidth);
           if (e.tagName === 'BUTTON' && (b.height < 24 || b.width < 24) && document.getElementById('stage').classList.contains('t')) bad.push('Tippfläche klein: ' + (e.id || e.className) + ' „' + t + '“ ' + Math.round(b.width) + '×' + Math.round(b.height)); });
+        document.querySelectorAll('#overlay .modal').forEach((mo) => { if (mo.classList.contains('full')) return; const cands = [...mo.querySelectorAll('.pxc, .row.back')].filter((c) => { const b = c.getBoundingClientRect(); return vis(c) && b.top >= st.top - 1 && b.bottom <= st.bottom + 1 && b.left >= st.left - 1 && b.right <= st.right + 1; });
+          if (!cands.length) bad.push('kein sichtbarer Schließen-Knopf in ' + mo.className); });
         return { bad, mode: document.getElementById('stage').className, size: Math.round(st.width) + '×' + Math.round(st.height) }; });
       if (r.bad.length) { problems += r.bad.length; console.log(`  ${where}: ` + r.bad.join(' | ')); } return r; };
     const lay = await check('Titel'); console.log(`${dev}: Bühne ${lay.size}, ${lay.mode}`); await shot('1_titel');

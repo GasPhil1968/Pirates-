@@ -13,9 +13,12 @@ function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&': 
 UI.esc = esc;
 
 // ---------------------------------------------------------------- Eingabeart
-UI.touch = false;
-try { UI.touch = (navigator.maxTouchPoints || 0) > 0 && matchMedia('(pointer: coarse)').matches; } catch(e){}
-UI.setTouch = function(v){ v = !!v; if (UI.touch === v) return; UI.touch = v; document.body.classList.toggle('touch', v); UI.layout(); };
+// UI.touch: letzte Eingabe war ein Finger (Verben als Knöpfe statt Menü am Zeiger).
+// UI.touchDevice: Gerät mit Finger-Bedienung (bleibt gesetzt) – bestimmt Layout und Tippflächen, damit nichts umspringt,
+// wenn auf einem iPad mit Trackpad oder einem Touch-Laptop zwischen Finger und Maus gewechselt wird.
+UI.touch = false; UI.touchDevice = false;
+try { UI.touch = UI.touchDevice = (navigator.maxTouchPoints || 0) > 0 && matchMedia('(pointer: coarse)').matches; } catch(e){}
+UI.setTouch = function(v){ v = !!v; var relayout = v && !UI.touchDevice; if (v) UI.touchDevice = true; if (UI.touch === v && !relayout) return; UI.touch = v; document.body.classList.toggle('touch', v); if (relayout) UI.layout(); else UI.refreshLabel(); };
 
 // ---------------------------------------------------------------- Layout
 var L = UI.L = { mode: 'std', u: 2, x: 0, y: 0, w: 640, h: 400, rot: false };
@@ -25,15 +28,16 @@ UI.layout = function(){
   var stage = $('stage'); if (!stage) return;
   var vw = window.innerWidth, vh = window.innerHeight;
   if (window.visualViewport){ vw = Math.round(window.visualViewport.width); vh = Math.round(window.visualViewport.height); }
-  var portrait = UI.touch && vh > vw*1.05;
+  var portrait = UI.touchDevice && vh > vw*1.05;
   L.rot = portrait && UI.rotOk; $('rotate').classList.toggle('on', portrait && !UI.rotOk);
   var lw = L.rot ? vh : vw, lh = L.rot ? vw : vh;
   var sb = safeBox(); var padL = L.rot ? 0 : sb.l, padR = L.rot ? 0 : sb.r, padT = L.rot ? 0 : sb.t, padB = L.rot ? 0 : sb.b;
   var aw = lw-padL-padR, ah = lh-padT-padB;
   var uStd = devScale(Math.min(aw/320, ah/200));
   var mode = 'std', u = uStd, rowH = 0, railW = 0;
-  if (UI.touch){ rowH = 50; railW = 66; var uR = devScale(Math.min((aw-2*railW)/320, (ah-rowH)/144));
-    if (uR > uStd*1.12){ mode = 'rails'; u = uR; } }
+  if (UI.touchDevice){ rowH = 50; railW = 66; var uR = devScale(Math.min((aw-2*railW)/320, (ah-rowH)/144));
+    var phone = Math.min(aw, ah) < 500;
+    if (uR > uStd*1.12 || (phone && uR >= uStd)){ mode = 'rails'; u = uR; } }
   L.mode = mode; L.u = u;
   var W0, H0;
   if (mode === 'std'){ W0 = 320*u; H0 = 200*u; }
@@ -42,7 +46,7 @@ UI.layout = function(){
   stage.style.width = W0+'px'; stage.style.height = H0+'px';
   if (L.rot){ stage.style.left = '50%'; stage.style.top = '50%'; stage.style.transform = 'translate(-50%,-50%) rotate(90deg)'; }
   else { stage.style.left = L.x+'px'; stage.style.top = L.y+'px'; stage.style.transform = ''; }
-  stage.className = 'm-'+mode+(UI.touch ? ' t' : ' p')+(MA.settings.bigText ? ' big' : '')+(MA.settings.readable ? ' readable' : '');
+  stage.className = 'm-'+mode+(UI.touchDevice ? ' t' : ' p')+(H0 < 420 ? ' short' : '')+(MA.settings.bigText ? ' big' : '')+(MA.settings.readable ? ' readable' : '');
   stage.style.setProperty('--u', u+'px');
   if (mode === 'rails'){ var sw = 320*u, slot = Math.max(40, Math.min(60, Math.floor((sw-240-96)/6)));
     stage.style.setProperty('--rw', railW+'px'); stage.style.setProperty('--rh', rowH+'px'); stage.style.setProperty('--sw', sw+'px'); stage.style.setProperty('--sh', (144*u)+'px'); stage.style.setProperty('--slot', slot+'px'); }
@@ -107,7 +111,8 @@ UI.refreshLabel = function(){ var lab = $('label'); if (!lab) return; if (touchV
   if (E.selected){ t = 'Benutze '+MA.itemName(E.selected)+' mit '+(hoverName ? hoverName : '…'); }
   else t = hoverName;
   lab.innerHTML = t ? '<span class="lt">'+esc(t)+'</span>' : '';
-  if (E.selected){ var x = el('button', 'btn bx', '✕'); x.onclick = function(){ E.selected = null; UI.refreshBar(); }; lab.appendChild(x); } };
+  if (E.selected){ var ab = el('button', 'btn bx ba', 'Ansehen'); ab.id = 'b-itemmenu'; ab.onclick = function(ev){ ev.stopPropagation(); if (!E.selected) return; if (UI.verbsOpen()){ UI.closeVerbs(); return; } var sl = document.querySelector('#inv .slot[data-item="'+E.selected+'"]'); UI.itemMenu(E.selected, sl || ab); }; lab.appendChild(ab);
+    var x = el('button', 'btn bx', '✕'); x.onclick = function(){ E.selected = null; UI.closeVerbs(); UI.refreshBar(); }; lab.appendChild(x); } };
 
 // ---------------------------------------------------------------- Verben
 var touchVerbs = null;   // {hs, verbs} solange die Leiste Verbknöpfe zeigt
@@ -142,9 +147,11 @@ function bindSlot(s, i){ var down = null;
   s.addEventListener('pointermove', function(ev){ if (!down) return; var dx = ev.clientX-down.x, dy = ev.clientY-down.y; if (!down.drag && Math.hypot(dx, dy) > 12){ down.drag = true; UI.dragStart(down.id); } if (down.drag) UI.dragMove(ev.clientX, ev.clientY); });
   s.addEventListener('pointerup', function(ev){ if (!down) return; var d = down; down = null; if (d.drag){ UI.dragEnd(ev.clientX, ev.clientY); return; }
     UI.setTouch(ev.pointerType !== 'mouse');
+    // 1. Tipp: wählen („Benutze … mit …“, Szene bleibt frei) · 2. Tipp: kleines Menü (Ansehen/Lesen/Öffnen) · 3. Tipp: Wahl aufheben
     var id = d.id; if (E.selected && E.selected !== id){ var a = E.selected; MA.useItem(a, { item: id }); return; }
-    if (E.selected === id){ E.selected = null; UI.closeVerbs(); UI.refreshBar(); return; }
-    E.selected = id; UI.refreshBar(); UI.itemMenu(id, s); });
+    if (E.selected === id){ if (UI.verbsOpen()){ E.selected = null; UI.closeVerbs(); UI.refreshBar(); return; } UI.itemMenu(id, s); return; }
+    UI.closeVerbs(); E.selected = id; UI.refreshBar(); });
+  s.addEventListener('contextmenu', function(ev){ ev.preventDefault(); ev.stopPropagation(); var id = s.dataset.item; if (!id || E.busy || UI.modal() || E.dlg) return; UI.closeVerbs(); E.selected = null; UI.refreshBar(); MA.itemVerb(id, 'look'); });
   s.addEventListener('pointercancel', function(){ if (down && down.drag) UI.dragCancel(); down = null; }); }
 // Ziehen eines Gegenstands auf ein Ziel
 var ghost = null, dragId = null;
@@ -180,10 +187,14 @@ UI.showChoices = function(d){ var box = $('choices'); box.innerHTML = ''; box.cl
   if (d.title) box.appendChild(el('div', 'ct', esc(d.title)));
   var list = el('div', 'cl'); d.opts.forEach(function(o, i){ var asked = !o.bye && !o.noGray && MA.GS.seen['ask:'+o.t];
     var b = el('button', 'co'+(asked ? ' asked' : '')+(o.bye ? ' bye' : ''), '<span class="n">'+(i < 9 ? (i+1) : '·')+'</span><span class="t">'+esc(o.t)+'</span>'); b.onclick = function(){ E.chooseDone(i); }; list.appendChild(b); });
-  box.appendChild(list); positionChoices(); };
+  box.appendChild(list); positionChoices(); box.scrollTop = 0; moreChoices(); };
+// Passt die Liste nicht ganz hinein, zeigt ▼ unten an, dass weitere Antworten folgen (nichts bleibt unbemerkt verdeckt)
+function moreChoices(){ var box = $('choices'); box.classList.toggle('more', box.scrollTop+box.clientHeight < box.scrollHeight-2); }
+document.addEventListener('DOMContentLoaded', function(){ var box = $('choices'); if (box) box.addEventListener('scroll', moreChoices, { passive: true }); });
 function positionChoices(){ var box = $('choices'); if (!box.classList.contains('on')) return; var u = L.u;
-  if (L.mode === 'std'){ box.style.left = '0px'; box.style.width = (320*u)+'px'; box.style.bottom = '0px'; box.style.top = ''; box.style.maxHeight = (100*u)+'px'; box.style.minHeight = (56*u)+'px'; }
-  else { box.style.left = L.sx+'px'; box.style.width = (320*u)+'px'; box.style.bottom = '0px'; box.style.top = ''; box.style.maxHeight = Math.round(L.h*0.66)+'px'; box.style.minHeight = L.rowH+'px'; } }
+  if (L.mode === 'std'){ box.style.left = '0px'; box.style.width = (320*u)+'px'; box.style.bottom = '0px'; box.style.top = ''; box.style.maxHeight = ((UI.touchDevice ? 124 : 100)*u)+'px'; box.style.minHeight = (56*u)+'px'; }
+  else { box.style.left = L.sx+'px'; box.style.width = (320*u)+'px'; box.style.bottom = '0px'; box.style.top = ''; box.style.maxHeight = Math.round(L.h*0.8)+'px'; box.style.minHeight = L.rowH+'px'; }
+  moreChoices(); }
 UI.hideChoices = function(){ var box = $('choices'); box.className = ''; box.innerHTML = ''; };
 UI.choiceKey = function(k){ var d = E.dlg; if (!d) return false; var n = parseInt(k, 10); if (n >= 1 && n <= 9 && n <= d.opts.length){ E.chooseDone(n-1); return true; }
   var bs = document.querySelectorAll('#choices .co');
@@ -210,7 +221,10 @@ UI.drawSceneMarks = function(fb, view){ var h = E.selectedHs; if (!h || !UI.touc
 var stack = [];
 UI.modal = function(){ return stack.length > 0; };
 UI.topModal = function(){ return stack[stack.length-1] || null; };
-UI.pushModal = function(node, o){ o = o || {}; var ov = $('overlay'); var wrap = el('div', 'modal '+(o.cls || '')); wrap.appendChild(node); ov.appendChild(wrap); ov.classList.add('on'); var m = { node: wrap, onClose: o.onClose, esc: o.esc !== false, kind: o.kind || '' }; stack.push(m); E.paused = true; return m; };
+UI.pushModal = function(node, o){ o = o || {}; var ov = $('overlay'); var wrap = el('div', 'modal '+(o.cls || '')); wrap.appendChild(node); ov.appendChild(wrap); ov.classList.add('on'); var m = { node: wrap, onClose: o.onClose, esc: o.esc !== false, kind: o.kind || '' }; stack.push(m); E.paused = true;
+  if (o.x && m.esc && node.classList.contains('panel')){ var xb = el('div', 'pxbar'), x = el('button', 'pxc', '✕'); x.title = 'Schließen'; x.setAttribute('aria-label', 'Schließen'); x.onclick = function(ev){ ev.stopPropagation(); UI.popModal(m, null); }; xb.appendChild(x); node.insertBefore(xb, node.firstChild); }
+  if (m.esc && !/\bfull\b/.test(o.cls || '')) wrap.addEventListener('click', function(ev){ if (ev.target === wrap && UI.topModal() === m) UI.popModal(m, null); });
+  return m; };
 UI.popModal = function(m, v){ m = m || UI.topModal(); if (!m) return; var i = stack.indexOf(m); if (i < 0) return; stack.splice(i, 1); m.node.remove(); if (!stack.length){ $('overlay').classList.remove('on'); E.paused = false; } if (m.onClose) m.onClose(v); };
 UI.closeTop = function(){ var m = UI.topModal(); if (m && m.esc){ UI.popModal(m, null); return true; } return false; };
 UI.closeAllModals = function(){ while (stack.length) UI.popModal(stack[stack.length-1], null); };

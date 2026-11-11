@@ -14,7 +14,7 @@ UI.confirm = function(text, yes, no){ return new Promise(function(res){ var p = 
   m = UI.pushModal(p, { cls: 'small', kind: 'confirm', onClose: function(v){ res(!!v); } }); }); };
 
 // ---------------------------------------------------------------- Titelbild
-UI.openTitle = function(){ UI.closeAllModals(); E.screen = 'title'; MA.clearTimers(); MA.UI.hideChoices(); MA.UI.hideSpeech();
+UI.openTitle = function(){ if (MA.updatePending){ location.reload(); return; } UI.closeAllModals(); E.screen = 'title'; MA.clearTimers(); MA.UI.hideChoices(); MA.UI.hideSpeech();
   var wrap = el('div', 'title'); var bgc = el('canvas', 'tbg'); bgc.width = 320; bgc.height = 200; wrap.appendChild(bgc); if (MA.paintTitle) UI.paintBuf(bgc, MA.paintTitle());
   var head = el('div', 'thead'); head.appendChild(el('div', 'tt', 'M. Adventure')); head.appendChild(el('div', 'ts', 'Mostar 1955 · Der Genosse kommt!')); wrap.appendChild(head);
   var menu = el('div', 'tmenu');
@@ -26,9 +26,11 @@ UI.openTitle = function(){ UI.closeAllModals(); E.screen = 'title'; MA.clearTime
   menu.appendChild(btn('Steuerung', function(){ UI.openControls(); }));
   menu.appendChild(btn('Über das Spiel', function(){ UI.openAbout(); }));
   wrap.appendChild(menu);
-  var done = MA.doneInfo(); var foot = el('div', 'tfoot', esc('Fassung '+MA.BUILD+(done ? ' · Kapitel Mostar abgeschlossen ✓' : ''))); wrap.appendChild(foot);
+  var foot = el('div', 'tfoot', esc(titleFoot())); wrap.appendChild(foot);
   UI.pushModal(wrap, { cls: 'full', esc: false, kind: 'title' });
 };
+function titleFoot(){ var done = MA.doneInfo(); return 'Fassung '+MA.BUILD+(MA.offlineReady ? ' · Offline bereit ✓' : '')+(done ? ' · Kapitel Mostar abgeschlossen ✓' : ''); }
+UI.refreshTitleFoot = function(){ var f = document.querySelector('.title .tfoot'); if (f) f.textContent = titleFoot(); };
 UI.continueFrom = function(slot){ var r = MA.readSave(slot); if (!r || r.damaged){ UI.toast('Dieser Stand lässt sich nicht laden.'); return; }
   if (!MA.loadEnv(r.env)){ UI.toast('Dieser Stand lässt sich nicht laden.'); return; }
   UI.closeAllModals(); UI.showRecap(r.meta); };
@@ -42,11 +44,10 @@ UI.openPause = function(){ if (E.screen !== 'game' || UI.modal()) return; UI.clo
   p.appendChild(btn('Weiterspielen', function(){ UI.popModal(m); }, 'hi'));
   p.appendChild(btn('Speichern', function(){ UI.openSaves('save'); }));
   p.appendChild(btn('Laden', function(){ UI.openSaves('load'); }));
-  p.appendChild(btn('Notizen', function(){ UI.popModal(m); UI.openJournal(); }));
   p.appendChild(btn('Einstellungen', function(){ UI.openSettings(); }));
   p.appendChild(btn('Steuerung', function(){ UI.openControls(); }));
   var t = btn('Zum Titelbild', function(){ var ok = MA.saveTo('auto'); UI.toast(ok ? 'Automatisch gespeichert.' : 'Nicht gespeichert.'); UI.closeAllModals(); UI.openTitle(); }); t.appendChild(el('span', 'note', 'speichert automatisch')); p.appendChild(t);
-  m = UI.pushModal(p, { kind: 'pause' }); };
+  m = UI.pushModal(p, { kind: 'pause', x: true }); };
 
 // ---------------------------------------------------------------- Speichern / Laden
 UI.openSaves = function(mode){ var p = panel(mode === 'save' ? 'Speichern' : 'Laden'); var m, list = el('div', 'saves');
@@ -64,7 +65,7 @@ UI.openSaves = function(mode){ var p = panel(mode === 'save' ? 'Speichern' : 'La
       row.appendChild(acts); list.appendChild(row); }); }
   render(); p.appendChild(list); p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back'));
   p.appendChild(el('p', 'fine', 'Spielstände liegen nur in diesem Browser auf diesem Gerät (Schlüssel „madv.v1.*“, getrennt von MALA).'));
-  m = UI.pushModal(p, { cls: 'wide', kind: 'saves' }); };
+  m = UI.pushModal(p, { cls: 'wide', kind: 'saves', x: true }); };
 
 // ---------------------------------------------------------------- Einstellungen
 UI.openSettings = function(){ var p = panel('Einstellungen'), m, S = MA.settings;
@@ -79,23 +80,23 @@ UI.openSettings = function(){ var p = panel('Einstellungen'), m, S = MA.settings
   p.appendChild(btn('Vollbild', function(){ var d = document.documentElement; try { var r = (d.requestFullscreen || d.webkitRequestFullscreen).call(d); if (r && r.then) r.then(function(){ try { screen.orientation.lock('landscape').catch(function(){}); } catch(e){} }).catch(function(){}); } catch(e){ UI.toast('Vollbild ist hier nicht möglich.'); } }));
   p.appendChild(el('p', 'fine', 'Dieses Kapitel hat bewusst keinen Ton (Vorgabe des Spielkonzepts für die Browserfassung).'));
   p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back'));
-  m = UI.pushModal(p, { kind: 'settings' }); };
+  m = UI.pushModal(p, { kind: 'settings', x: true }); };
 
 UI.openControls = function(){ var p = panel('Steuerung'), m;
   var t = ['<b>Ort antippen oder anklicken:</b> M. sieht es sich an. Kann man mehr damit tun, erscheinen genau diese Handlungen – mit der Maus als kleines Menü am Zeiger, mit dem Finger als große Knöpfe unten.',
     '<b>Boden:</b> hingehen. <b>Ausgang:</b> M. geht los; zweimal schnell antippen überspringt den Weg.',
-    '<b>Gegenstand antippen:</b> „Benutze … mit …“, dann das Ziel antippen – eine Stelle, eine Person, einen anderen Gegenstand oder M.s Bild unten links. Gegenstände lassen sich auch auf ein Ziel ziehen. Erneut antippen oder ✕ hebt die Wahl auf.',
+    '<b>Gegenstand antippen:</b> „Benutze … mit …“, dann das Ziel antippen – eine Stelle, eine Person, einen anderen Gegenstand oder M.s Bild in der Leiste. Gegenstände lassen sich auch auf ein Ziel ziehen. Den gewählten Gegenstand noch einmal antippen (oder „Ansehen“): ansehen, lesen, öffnen. ✕ oder ein Tipp auf freien Boden hebt die Wahl auf. Am Rechner: Rechtsklick auf einen Gegenstand zeigt ihn direkt.',
     '<b>Gespräche:</b> Antwort antippen; am Rechner auch Ziffern 1–9. Ein Tipp aufs Bild beendet einen Satz.',
     '<b>Notizen:</b> was M. gerade beschäftigt – keine Lösungen. <b>Karte:</b> bekannte Orte. <b>Zeigen:</b> markiert kurz alle Stellen.',
     '<b>Tastatur:</b> Esc Menü/Schließen · Leertaste/Enter Satz weiter · N Notizen · K Karte · Z Zeigen · I Inventar blättern.'];
-  t.forEach(function(s){ p.appendChild(el('p', '', s)); }); p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back')); m = UI.pushModal(p, { cls: 'wide', kind: 'controls' }); };
+  t.forEach(function(s){ p.appendChild(el('p', '', s)); }); p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back')); m = UI.pushModal(p, { cls: 'wide', kind: 'controls', x: true }); };
 
 UI.openAbout = function(){ var p = panel('Über das Spiel'), m;
   ['<b>M. Adventure</b> erzählt die Lebensgeschichte von M., geboren 1942 in einem armen Dorf in Bosnien-Herzegowina. Diese Fassung enthält das Kapitel <b>Mostar 1955 – „Der Genosse kommt!“</b> als eigenständig spielbaren Abschnitt.',
    'Grundlage: das Spielkonzept „M Adventure“ (Figuren, Drehbuch S01–S35). Bild- und Bedienungssprache nach der Referenz MALA („Die Stillen“); Palette, Malkasten und Figuren-Rig sind technisch übernommen.',
    'Ohne Ton und ohne Video, wie im Konzept für die Browserfassung vorgesehen. Nach dem Kapitel geht es zurück zum Hauptmenü.',
    'Fassung '+esc(MA.BUILD)+' · v'+esc(MA.VERSION)].forEach(function(s){ p.appendChild(el('p', '', s)); });
-  p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back')); m = UI.pushModal(p, { cls: 'wide', kind: 'about' }); };
+  p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back')); m = UI.pushModal(p, { cls: 'wide', kind: 'about', x: true }); };
 
 // ---------------------------------------------------------------- Notizen
 UI.openJournal = function(){ if (UI.modal() && UI.topModal().kind !== 'pause') return; if (E.dlg) return; UI.closeVerbs(); var p = panel('Notizen', 'Was mich beschäftigt'), m, G = MA.GS;
@@ -107,13 +108,14 @@ UI.openJournal = function(){ if (UI.modal() && UI.topModal().kind !== 'pause') r
   [['open', 'Offen ('+open.length+')'], ['done', 'Erledigt ('+done.length+')']].forEach(function(t){ var b = el('button', 'tab', esc(t[1])); b.dataset.w = t[0]; b.onclick = function(){ show(t[0]); }; tabs.appendChild(b); });
   p.appendChild(tabs); p.appendChild(body); show('open');
   p.appendChild(btn('Schließen', function(){ UI.popModal(m); }, 'back'));
-  m = UI.pushModal(p, { cls: 'wide', kind: 'journal', onClose: function(){ G.noteNew = {}; UI.refreshBar(); } }); };
+  m = UI.pushModal(p, { cls: 'wide', kind: 'journal', x: true, onClose: function(){ G.noteNew = {}; UI.refreshBar(); } }); };
 
 // ---------------------------------------------------------------- Stadtplan
 // MA.MAP.locs: [{id, name, x, y, room, known(GS), open(GS) -> true | 'Grund'}]; nur bekannte Orte erscheinen
 UI.openMap = function(){ if (E.screen !== 'game' || UI.modal() || E.busy) return; UI.closeVerbs(); var p = el('div', 'mappanel'), m, u = UI.L.u;
-  var cv = el('canvas', 'mapc'); cv.width = 320; cv.height = 144; if (MA.paintMap) UI.paintBuf(cv, MA.paintMap(MA.GS)); p.appendChild(cv);
-  var layer = el('div', 'maplocs'); p.appendChild(layer);
+  var mw = el('div', 'mapwrap'); p.appendChild(mw);
+  var cv = el('canvas', 'mapc'); cv.width = 320; cv.height = 144; if (MA.paintMap) UI.paintBuf(cv, MA.paintMap(MA.GS)); mw.appendChild(cv);
+  var layer = el('div', 'maplocs'); mw.appendChild(layer);
   var here = MA.GS.room, hereLoc = MA.MAP.locs.filter(function(l){ return l.room === here || (l.rooms && l.rooms.indexOf(here) >= 0); })[0];
   var indoor = E.room && E.room.indoor;
   var msg = el('div', 'mapmsg', indoor ? 'Von drinnen zeigt der Plan nur, wo ich bin.' : 'Wohin? Ein Ort genügt.');
@@ -122,8 +124,7 @@ UI.openMap = function(){ if (E.screen !== 'game' || UI.modal() || E.busy) return
     b.onclick = async function(){ if (isHere){ msg.textContent = 'Hier bin ich.'; return; } if (indoor){ msg.textContent = 'Erst muss ich nach draußen.'; return; } if (open !== true){ msg.textContent = open; return; }
       UI.popModal(m); await MA.travel(l); };
     layer.appendChild(b); });
-  var foot = el('div', 'mapfoot'); foot.appendChild(msg); foot.appendChild(btn('Schließen', function(){ UI.popModal(m); }, 'back mini')); p.appendChild(foot);
-  p.appendChild(el('div', 'legend', '◉ hier · ◌ bekannt · 🔒 noch nicht'));
+  var foot = el('div', 'mapfoot'); foot.appendChild(msg); foot.appendChild(el('div', 'legend', '◉ hier · ◌ bekannt · 🔒 noch nicht')); foot.appendChild(btn('Schließen', function(){ UI.popModal(m); }, 'back mini')); p.appendChild(foot);
   m = UI.pushModal(p, { cls: 'full map', kind: 'map' }); };
 
 // ---------------------------------------------------------------- Dokument (Lesen, Ansehen)

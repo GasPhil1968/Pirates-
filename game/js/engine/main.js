@@ -72,8 +72,17 @@ MA.boot = function(){
   window.addEventListener('pagehide', function(){ if (E.screen === 'game') MA.saveTo('auto'); });
   UI.openTitle();
   requestAnimationFrame(frame);
-  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol) && !/localhost|127\.0\.0\.1/.test(location.hostname)){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+  registerOffline();
 };
+// Offline-Fassung (wie in MALA): Service Worker nur über http(s) und nicht auf dem Entwicklungsrechner. Meldet „Offline bereit“,
+// sobald alle Dateien im Cache liegen; eine neue Fassung wird auf dem Titelbild neu geladen (Spielstände bleiben, sie liegen in localStorage).
+function registerOffline(){
+  if (!('serviceWorker' in navigator) || !/^https?:/.test(location.protocol) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  var sw = navigator.serviceWorker, hadCtrl = !!sw.controller;
+  sw.addEventListener('message', function(e){ if (e.data === 'offline-ready'){ MA.offlineReady = true; if (UI.refreshTitleFoot) UI.refreshTitleFoot(); } });
+  sw.addEventListener('controllerchange', function(){ if (!hadCtrl){ hadCtrl = true; return; } MA.updatePending = true; var t = UI.topModal(); if (E.screen === 'title' && t && t.kind === 'title') location.reload(); });
+  sw.register('sw.js').then(function(){ if (sw.controller) sw.controller.postMessage('check'); }).catch(function(){});
+}
 // Testzugang (nur lesend): Bildschirmlage von Stellen, Figuren und Gegenständen – damit automatische Durchläufe echt klicken können
 window.MADV = {
   sceneRect: function(){ var r = $('scene').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; },
