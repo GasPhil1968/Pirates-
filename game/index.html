@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08070d">
+<title>M. Adventure – Mostar 1955</title>
+<meta name="description" content="M. Adventure – Kapitel Mostar 1955: „Der Genosse kommt!“ Ein Point-and-Click-Adventure.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="M. Adventure">
+<link rel="stylesheet" href="css/game.css">
+</head><body>
+<div id="safeprobe"></div>
+<div id="stage">
+  <canvas id="scene" width="320" height="144" aria-label="Spielszene"></canvas>
+  <div id="marks"></div>
+  <div id="speech" aria-live="polite"></div>
+  <div id="fade"></div>
+  <div id="bar"></div>
+  <div id="verbpop"></div>
+  <div id="choices"></div>
+  <div id="toast" role="status"></div>
+  <div id="overlay"></div>
+</div>
+<div id="rotate"><div class="rb"><h2>M. Adventure wird quer gespielt</h2><p>Dreh dein Gerät ins Querformat.</p><p class="fine">Ist die Drehsperre an? Dann spiel hier weiter – das Bild liegt richtig, sobald du das Gerät drehst.</p><button id="rot-ok" type="button">Gedreht weiterspielen</button></div></div>
+<noscript><p style="color:#f5efe0;font:16px sans-serif;padding:20px">M. Adventure braucht JavaScript.</p></noscript>
+<!-- Grafikbibliothek (technisch aus MALA übernommen) -->
+<script src="js/lib/mala_core.js"></script>
+<script src="js/lib/mala_art.js"></script>
+<script src="js/lib/mala_rig.js"></script>
+<!-- Engine -->
+<script src="js/engine/core.js"></script>
+<script src="js/engine/world.js"></script>
+<script src="js/engine/script.js"></script>
+<script src="js/engine/ui.js"></script>
+<script src="js/engine/ui_panels.js"></script>
+<script src="js/engine/main.js"></script>
+<!-- Grafik von M. Adventure -->
+<script src="js/art/cast.js"></script>
+<script src="js/art/portraits.js"></script>
+<script src="js/art/icons.js"></script>
+<script src="js/art/scenery.js"></script>
+<script src="js/art/room_hof.js"></script>
+<script src="js/art/room_klasse.js"></script>
+<script src="js/art/room_markt.js"></script>
+<script src="js/art/room_most.js"></script>
+<script src="js/art/room_sperre.js"></script>
+<script src="js/art/room_parade.js"></script>
+<script src="js/art/title_map.js"></script>
+<!-- Inhalt: Kapitel Mostar 1955 -->
+<script src="js/content/cast.js"></script>
+<script src="js/content/items.js"></script>
+<script src="js/content/notes.js"></script>
+<script src="js/content/puzzles.js"></script>
+<script src="js/content/hof.js"></script>
+<script src="js/content/klasse.js"></script>
+<script src="js/content/markt.js"></script>
+<script src="js/content/most.js"></script>
+<script src="js/content/sperre.js"></script>
+<script src="js/content/parade.js"></script>
+<script src="js/content/chapter.js"></script>
+<script>MA.boot();</script>
+</body></html>

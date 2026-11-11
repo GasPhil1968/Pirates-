@@ -1,0 +1,61 @@
+// Vollständiger Durchlauf über die Oberfläche: Titel → Einstieg → alle Rätselketten → Finale → Abschlussbild → Hauptmenü.
+// Aufruf: node tools/playthrough.js [outdir] [device]   (device z. B. "iPhone 13 landscape" für Touch)
+const { Driver } = require('./driver');
+const fs = require('fs');
+(async () => {
+  const out = process.argv[2] || '/tmp/madv_pt'; const device = process.argv[3];
+  fs.mkdirSync(out, { recursive: true });
+  const d = await Driver.launch({ device, shots: out });
+  const step = async (name, fn) => { const t0 = Date.now(); try { await fn(); console.log(`✓ ${name} (${Date.now() - t0} ms)`); } catch (e) {
+      console.log(`✗ ${name}: ${e.message}`); console.log('state', JSON.stringify(await d.st())); console.log('letzte Zeilen:\n  ' + d.log.slice(-12).join('\n  ')); await d.page.screenshot({ path: out + '/FAIL.png' }); console.log(d.errors.join('\n')); await d.close(); process.exit(1); } };
+  await step('Neues Spiel', async () => { await d.page.locator('.tmenu .row', { hasText: 'Neues Spiel' }).click(); await d.page.waitForTimeout(500); await d.idle(); await d.shot('intro'); });
+  await step('S01 Branko', async () => { await d.choose('Ich gehe zum Lehrer'); await d.expectFlag('intro.done'); });
+  await step('Schultor ohne Auftrag gesperrt', async () => { await d.exit('tor', 'hof'); });
+  await step('Klassenzimmer', async () => { await d.exit('tuer', 'klasse'); await d.shot('klasse'); });
+  await step('S02 Lehrer', async () => { await d.talk('lehrer'); await d.choose('Ich schaue mir die Blätter'); await d.expectFlag('teacher.met'); });
+  await step('Kohlepapier (Fehlversuch, dann richtig)', async () => { await d.verb('mappe', 'Öffne'); await d.puzzle('Mit dem Bleistift nachfahren');
+      const s = await d.st(); if (s.modal !== 'puzzle') throw new Error('Rätsel zu früh geschlossen');
+      await d.puzzle('Original anheben', 'Kohlepapier tiefer', 'Original zurücklegen', 'Mit dem Bleistift nachfahren'); await d.choose('Sagen Sie Branko'); await d.expectItem('auftrag'); await d.expectFlag('list.fixed'); });
+  await step('Plakette lesen', async () => { await d.verb('plakette', 'Lies'); await d.closeDoc(); await d.expectFlag('plakette.read'); });
+  await step('Zurück in den Hof, Branko: Nachtrag ohne Platz', async () => { await d.exit('tuer', 'hof'); await d.talk('branko'); await d.choose('Ich stehe jetzt im Durchschlag'); await d.choose('Bekomme ich ein Fähnchen'); await d.bye(); await d.expectFlag('branko.noPlace'); });
+  await step('Jasna: Dragan', async () => { await d.talk('jasna'); await d.choose('Wo ist Dragan'); await d.bye(); });
+  await step('Nedim: Murmel, Absprache', async () => { await d.talk('nedim'); await d.choose('Du hältst das Bankende'); await d.bye(); await d.expectFlag('nedim.agreed'); });
+  await step('Zum Markt', async () => { await d.exit('tor', 'markt'); await d.shot('markt'); });
+  await step('S04 Mara, Beutel, Karton', async () => { await d.talk('mara'); await d.choose('Zeig mir, worauf'); await d.choose('Gut. Ich packe sie'); await d.bye(); await d.expectItem('beutel'); await d.expectItem('karton'); });
+  await step('S08/S09 Dedo, Löffel umdrehen, Abrieb', async () => { await d.talk('dedo'); await d.choose('Was ist an dem Löffel'); await d.choose('Darf ich ihn umdrehen'); await d.useOn('heft', 'loeffel'); await d.closeDoc(); await d.expectItem('abrieb'); });
+  await step('S11 Garantie', async () => { await d.talk('dedo'); await d.choose('Der Schulgründer starb 1898'); await d.choose('Deine Herkunftsbeschreibung'); await d.bye(); await d.expectItem('loeffel'); });
+  await step('Zurück zur Schule (Karte)', async () => { await d.mapTo('Schule', 'hof'); });
+  await step('S05 Plan abzeichnen', async () => { await d.talk('jasna'); await d.choose('Kann ich den Plan abzeichnen'); await d.bye(); await d.useOn('karton', 'plan'); await d.expectItem('raster'); });
+  await step('S06 Schere', async () => { await d.exit('tuer', 'klasse'); await d.talk('lehrer'); await d.choose('Ich brauche Ihre Schere'); await d.bye(); await d.expectItem('einsatz'); });
+  await step('S16/S17 Beutel und erste Probe', async () => { await d.talk('lehrer'); await d.choose('Hier ist Ihr Schulmaterial'); await d.choose('falsche Vorlage richtig'); await d.expectItem('vorlage'); const s = await d.st(); if (s.room !== 'hof') throw new Error('nicht im Hof nach der Probe'); });
+  await step('Probetafel korrigieren', async () => { await d.useOn('vorlage', 'tafel'); await d.puzzle('Wort „drugi“', 'Das I wegwischen', 'Rahmen', 'Rahmen nur um die Rufzeile'); await d.expectFlag('board.word'); await d.expectFlag('board.frame'); });
+  await step('S18 Rollen', async () => { await d.talk('jasna'); await d.choose('Du liest die Zeile'); await d.bye(); await d.talk('nedim'); await d.choose('Du achtest darauf'); await d.bye(); });
+  await step('Zweite Probe gelingt', async () => { await d.exit('tuer', 'klasse'); await d.talk('lehrer'); await d.choose('Die Tafel stimmt jetzt'); await d.expectFlag('probe.ok'); });
+  await step('S19 Knopf, Skizze, Kreide', async () => { await d.exit('tuer', 'klasse'); await d.look('lehrer'); await d.talk('lehrer'); await d.choose('Ihnen fehlt ein Knopf'); await d.choose('Dedo hat Knöpfe'); await d.bye(); await d.useOn('heft', 'lehrer'); await d.expectItem('skizze'); await d.verb('kreide', 'Nimm'); await d.expectItem('kreide'); });
+  await step('Zum Markt: S07 Packen, Lohn, Lieferauftrag', async () => { await d.exit('tuer', 'hof'); await d.exit('tor', 'markt'); await d.useOn('einsatz', 'kiste'); await d.choose('Bin ich jetzt Facharbeiter'); await d.choose('Ich trage sie'); await d.expectItem('lohn'); await d.expectItem('kiste'); await d.expectItem('lieferschein'); });
+  await step('Werbetafel', async () => { await d.combine('reste', 'kreide'); await d.expectItem('tafel'); });
+  await step('S12/S13 Schuh, Tischfuß, Stecken', async () => { await d.talk('dedo'); await d.choose('Ich nehme den rechten Schuh'); await d.choose('Ich habe dafür gearbeitet'); await d.bye(); await d.useOn('schuh', 'tisch'); await d.verb('stecken', 'Nimm'); await d.expectItem('stecken'); await d.expectItem('senkel'); });
+  await step('S20 Werbehandel', async () => { await d.talk('dedo'); await d.choose('Ich kann dir bessere Werbung'); await d.choose('Zufall'); await d.bye(); await d.expectFlag('dedo.deal'); });
+  await step('S24 Sandale reißt, flicken, Kiste zurück', async () => { await d.exit('gasse', 'markt'); await d.choose('Ich kann sie auch so tragen'); await d.expectItem('sandale'); await d.combine('senkel', 'sandale'); await d.talk('mara'); await d.choose('Gib mir die Kiste wieder'); await d.bye(); await d.expectItem('kiste'); });
+  await step('Zur Sperre, S22, Plakat und Kleister', async () => { await d.exit('gasse', 'sperre'); await d.shot('sperre'); await d.talk('kleber'); await d.choose('Brauchst du eine Hand'); await d.bye(); await d.useOn('klammern', 'plakat'); await d.expectItem('loeffel_k'); await d.expectItem('klammern'); });
+  await step('Vorschrift, S25 Lieferung durch die Sperre', async () => { await d.verb('vorschrift', 'Lies'); await d.closeDoc(); await d.exit('schlagbaum'); await d.choose('Soll ich wegsehen'); const s = await d.st(); if (s.room !== 'parade') throw new Error('nicht in der Paradestraße: ' + s.room); await d.shot('parade'); });
+  await step('S26 Entladen und Unterschrift', async () => { await d.talk('helfer'); await d.talk('helfer'); await d.choose('Hier unterschreiben'); /* zu früh */ await d.choose('Ich lade die nächste Reihe'); await d.choose('Ich lade die nächste Reihe'); await d.bye(); await d.verb('tisch', 'Benutze'); /* dritte Reihe über den Tisch, Unterschrift folgt */ await d.expectItem('schein_ok'); await d.expectItem('kiste_leer'); });
+  await step('S27 zurück zu Mara: Netz und Leine', async () => { await d.exit('zurueck', 'sperre'); await d.exit('west', 'markt'); await d.talk('mara'); await d.choose('Hier sind Kiste und Schein'); await d.choose('Du musst nicht erst'); await d.bye(); await d.expectItem('netz'); await d.expectItem('leine'); });
+  await step('S14 Murmel bergen', async () => { await d.exit('west', 'hof'); await d.useOn('heft', 'bank'); await d.useOn('loeffel_k', 'bank'); await d.expectItem('murmel'); await d.expectItem('heft'); });
+  await step('Fenster: Tor in die Offenrast', async () => { await d.exit('tuer', 'klasse'); await d.exit('fenster', 'fenster'); await d.verb('fluegel', 'Öffne'); await d.useOn('leine', 'riegel'); await d.verb('buste', 'Schiebe'); await d.verb('leine_f', 'Nimm'); await d.expectFlag('gate.offen'); await d.expectItem('leine'); await d.exit('zurueck', 'klasse'); });
+  await step('Zur Brücke: S15 Murmel gegen Zeitung, Abmachung', async () => { await d.exit('tuer', 'hof'); await d.exit('tor', 'markt'); await d.exit('ost', 'most'); await d.shot('most'); await d.talk('dragan'); await d.choose('Deine Murmel'); await d.choose('Ich bringe dich mit dem Ball'); await d.bye(); await d.expectItem('zeitung'); await d.expectFlag('deal.dragan'); });
+  await step('S29 Ballbergung', async () => { await d.combine('netz', 'leine'); await d.useOn('netzleine', 'bruestung'); await d.talk('dragan'); await d.choose('Hältst du die Leine'); await d.choose('Wir machen das langsam'); await d.useOn('stecken', 'ball'); await d.expectItem('ball'); await d.talk('dragan'); await d.choose('Dein Ball'); await d.expectFlag('dragan.atPassage'); });
+  await step('Zeitungsfahne bauen', async () => { await d.combine('zeitung', 'stecken'); await d.expectItem('fahne'); await d.expectItem('loeffel'); });
+  await step('S23 Fahne stempeln', async () => { await d.exit('west', 'markt'); await d.exit('west', 'hof'); await d.useOn('fahne', 'abl_mat'); await d.choose('Jetzt ist es keine Zeitung mehr'); await d.expectFlag('flag.stamped'); });
+  await step('S21 Werbung, Knopf, Pfeife', async () => { await d.talk('jasna'); await d.choose('Kommt ihr mit zu Dedo'); await d.puzzle('Knopf 1'); await d.puzzle('Der passt.'); /* falscher Knopf */ await d.puzzle('Knopf 4', 'Der passt.'); await d.expectItem('pfeife'); });
+  await step('Zur Sperre, Signal, Flucht, Ausweis', async () => { await d.exit('gasse', 'sperre'); await d.talk('dragan'); await d.itemVerb('pfeife', 'Benutze'); await d.choose('Ein langer Pfiff'); await d.itemVerb('pfeife', 'Benutze'); await d.choose('Zwei kurze Pfiffe'); await d.expectItem('ausweis'); await d.expectFlag('escape.done'); });
+  await step('Speichern auf Platz 1 vor dem Finale', async () => { await d.page.locator('#b-menu').click(); await d.page.waitForTimeout(300); await d.page.locator('.panel .row', { hasText: 'Speichern' }).click(); await d.page.waitForTimeout(300); await d.page.locator('.save').nth(0).locator('.row', { hasText: 'Speichern' }).click(); await d.page.waitForTimeout(400); await d.page.keyboard.press('Escape'); await d.page.keyboard.press('Escape'); await d.page.waitForTimeout(300); });
+  await step('S32 Einlass und Finale (S33 erst „Ich heiße M.“, dann „Hier.“)', async () => { await d.exit('schlagbaum'); await d.choose('III/4. Mit geprüftem'); await d.choose('Ich heiße M.'); await d.shot('finale_wahl'); await d.choose('„Hier.“');
+      for (let i = 0; i < 40; i++) { const s = await d.st(); if (s.modal === 'end') break; await d.page.waitForTimeout(300); await d.idle({ allowModal: true }).catch(() => {}); const s2 = await d.st(); if (s2.modal === 'card') { await d.page.locator('.card').click(); } }
+      await d.shot('ende'); const s = await d.st(); if (s.modal !== 'end') throw new Error('kein Abschlussbild: ' + JSON.stringify(s)); });
+  await step('Zum Hauptmenü', async () => { await d.page.locator('.endp .row', { hasText: 'Zum Hauptmenü' }).click(); await d.page.waitForTimeout(500); const s = await d.st(); if (s.modal !== 'title') throw new Error('kein Titel'); await d.shot('titel_danach'); });
+  console.log('Durchlauf vollständig. Dialogzeilen gesehen: ' + d.log.length);
+  fs.writeFileSync(out + '/dialoglog.txt', d.log.join('\n'));
+  console.log(d.errors.length ? 'Fehler im Browser:\n' + d.errors.join('\n') : 'keine Browserfehler');
+  await d.close();
+})();

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><title>Prüfblatt Figuren</title>
+<style>body{background:#2a2a33;margin:0;padding:8px;font:12px monospace;color:#ddd} canvas{image-rendering:pixelated;display:block} .lab{margin:6px 0 2px}</style></head>
+<body>
+<div class="lab">Sprites (Seite, vorn, hinten, Lauf S 0/2/4/6, sprechen, winken) – 4fach</div>
+<canvas id="spr"></canvas>
+<div class="lab">Porträts n / o / b – 4fach</div>
+<canvas id="por"></canvas>
+<script>var MA = {};</script>
+<script src="../game/js/lib/mala_core.js"></script>
+<script src="../game/js/lib/mala_art.js"></script>
+<script src="../game/js/lib/mala_rig.js"></script>
+<script src="../game/js/art/cast.js"></script>
+<script src="../game/js/art/portraits.js"></script>
+<script>
+(function(){
+  var P = M.P, ids = ['m','jasna','nedim','dragan','kidA','kidB','kidC','kidD','lehrer','branko','mara','dedo','jovan','kleber','helfer','tiko'];
+  function anim(ch, n){ var c = M.CHARS[ch]; return (c.anims && c.anims[n]) || M.ANIMS[n]; }
+  var cols = 10, cw = 34, chh = 60, W = cols*cw, Hh = ids.length*chh;
+  var b = new M.Buf(W, Hh, P.m1);
+  ids.forEach(function(id, r){ var y = r*chh+54;
+    var poses = [anim(id,'idleS')[0][0], anim(id,'idleF')[0][0], anim(id,'idleB')[0][0], anim(id,'walkS')[0], anim(id,'walkS')[2], anim(id,'walkS')[4], anim(id,'walkS')[6], anim(id,'talkS')[0][0], anim(id,'flagF')[0][0], anim(id,'waveF')[2][0]];
+    poses.forEach(function(p, i){ b.rect(i*cw, r*chh, cw-1, chh-1, (r+i)%2 ? P.s3 : P.s2); M.drawPose(b, i*cw+17, y, p, 'R', id, {}); });
+    M.text(b, id, 1, r*chh+1, P.k1); });
+  var Q=new URLSearchParams(location.search); var ps=+(Q.get('por')||0); if (ps){ document.getElementById('spr').style.display='none'; } else paintTo('spr', b, 4);
+  var pb = new M.Buf(ids.length*60, 3*68, P.m1), pids = ['m','jasna','nedim','dragan','lehrer','branko','mara','dedo','jovan','kleber','helfer','tiko'];
+  pb = new M.Buf(pids.length*60, 3*68, P.m1);
+  pids.forEach(function(id, i){ ['n','o','b'].forEach(function(v, j){ var p = MA.portrait(id, v); if (!p) return; pb.rect(i*60, j*68, 58, 66, P.k0); pb.blit(p, i*60+1, j*68+1); }); });
+  paintTo('por', pb, ps||4);
+  function paintTo(cid, buf, s){ var c = document.getElementById(cid); c.width = buf.w; c.height = buf.h; c.style.width = (buf.w*s)+'px'; var g = c.getContext('2d'), img = g.createImageData(buf.w, buf.h);
+    for (var i = 0; i < buf.d.length; i++){ var q = M.RGB[buf.d[i]] || [255,0,255], k = i*4; img.data[k]=q[0]; img.data[k+1]=q[1]; img.data[k+2]=q[2]; img.data[k+3]= buf.d[i]===M.T?0:255; } g.putImageData(img,0,0); }
+})();
+</script></body></html>

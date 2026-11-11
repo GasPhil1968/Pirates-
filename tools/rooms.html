@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><title>Prüfblatt Räume</title>
+<style>body{background:#222;margin:0;padding:6px;font:12px monospace;color:#ccc} canvas{image-rendering:pixelated;display:block;margin:2px 0 10px} </style></head>
+<body><div id="out"></div>
+<div id="stage" style="display:none"><canvas id="scene"></canvas><div id="marks"></div><div id="speech"></div><div id="fade"></div><div id="bar"></div><div id="verbpop"></div><div id="choices"></div><div id="toast"></div><div id="overlay"></div></div><div id="rotate"></div>
+<script src="../game/js/lib/mala_core.js"></script><script src="../game/js/lib/mala_art.js"></script><script src="../game/js/lib/mala_rig.js"></script>
+<script src="../game/js/engine/core.js"></script><script src="../game/js/engine/world.js"></script><script src="../game/js/engine/script.js"></script><script src="../game/js/engine/ui.js"></script><script src="../game/js/engine/ui_panels.js"></script><script src="../game/js/engine/main.js"></script>
+<script src="../game/js/art/cast.js"></script><script src="../game/js/art/portraits.js"></script><script src="../game/js/art/icons.js"></script><script src="../game/js/art/scenery.js"></script>
+<script src="../game/js/art/room_hof.js"></script><script src="../game/js/art/room_klasse.js"></script><script src="../game/js/art/room_markt.js"></script><script src="../game/js/art/room_most.js"></script><script src="../game/js/art/room_sperre.js"></script><script src="../game/js/art/room_parade.js"></script><script src="../game/js/art/title_map.js"></script>
+<script src="../game/js/content/cast.js"></script><script src="../game/js/content/items.js"></script><script src="../game/js/content/notes.js"></script><script src="../game/js/content/puzzles.js"></script>
+<script src="../game/js/content/hof.js"></script><script src="../game/js/content/klasse.js"></script><script src="../game/js/content/markt.js"></script><script src="../game/js/content/most.js"></script><script src="../game/js/content/sperre.js"></script><script src="../game/js/content/parade.js"></script><script src="../game/js/content/chapter.js"></script>
+<script>
+(function(){
+  var Q = new URLSearchParams(location.search), flags = (Q.get('flags') || '').split(',').filter(Boolean), only = Q.get('room'), scale = +(Q.get('s') || 2);
+  var out = document.getElementById('out');
+  function show(label, buf){ var c = document.createElement('canvas'); c.width = buf.w; c.height = buf.h; c.style.width = (buf.w*scale)+'px'; var g = c.getContext('2d'), img = g.createImageData(buf.w, buf.h);
+    for (var i = 0; i < buf.d.length; i++){ var q = M.RGB[buf.d[i]] || [255, 0, 255], k = i*4; img.data[k] = q[0]; img.data[k+1] = q[1]; img.data[k+2] = q[2]; img.data[k+3] = 255; } g.putImageData(img, 0, 0);
+    var d = document.createElement('div'); d.textContent = label; out.appendChild(d); out.appendChild(c); }
+  var rooms = only ? [only] : ['hof', 'klasse', 'fenster', 'markt', 'most', 'sperre', 'parade'];
+  rooms.forEach(function(id){ MA.GS = MA.fresh(); flags.forEach(function(f){ var kv = f.split('='); MA.GS.flags[kv[0]] = kv[1] === undefined ? true : (isNaN(+kv[1]) ? kv[1] : +kv[1]); });
+    var r = MA.ROOMS[id]; MA.GS.pos = { x: (r.start || [160, 120])[0], y: (r.start || [160, 120])[1], f: (r.start || [0, 0, 'R'])[2] };
+    MA.loadRoom(id); MA.E.screen = 'game'; for (var t = 0; t < 30; t++) MA.E.update(33);
+    var maxCam = Math.max(0, r.width-320); [0, maxCam].filter(function(v, i, a){ return a.indexOf(v) === i; }).forEach(function(cam){ MA.E.camX = cam; MA.E.camLock = cam; show(id+' cam '+cam, MA.renderScene()); }); });
+  if (!only) { show('title', MA.paintTitle()); show('map', MA.paintMap(MA.GS)); }
+})();
+</script></body></html>
