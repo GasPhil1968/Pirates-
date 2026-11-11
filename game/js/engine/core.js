@@ -6,7 +6,7 @@ var MA = window.MA || {};
 (function(MA){
 'use strict';
 MA.VERSION = '1.0.0';
-MA.BUILD = '11.11.2026 · 8d6f37';
+MA.BUILD = '11.11.2026 · 0cbaef';
 MA.KEY = 'madv.v1.';
 MA.W = 320; MA.SH = 144; MA.H = 200;
 

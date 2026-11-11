@@ -32,6 +32,7 @@ button:focus{ outline:none; } button:focus-visible{ outline:calc(var(--u)*1) sol
 #bar .label .lt{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #bar .label .btn{ position:static; padding:0 calc(var(--u)*5); height:100%; }
 #bar .label .bx{ padding:0 calc(var(--u)*4); color:var(--s4); }
+#stage.t #bar .label .bx{ min-width:32px; }
 #bar .inv{ position:absolute; display:flex; align-items:stretch; gap:calc(var(--u)*2); }
 #bar .arrow{ color:var(--y3); width:calc(var(--u)*10); display:flex; align-items:center; justify-content:center; }
 #bar .arrow:disabled{ color:var(--y1); }
@@ -58,13 +59,14 @@ button:focus{ outline:none; } button:focus-visible{ outline:calc(var(--u)*1) sol
 #bar.bar-rails .b-menu{ right:6px; top:6px; width:calc(var(--rw) - 12px); height:46px; }
 #bar.bar-rails .b-map{ right:6px; top:58px; width:calc(var(--rw) - 12px); height:46px; }
 #bar.bar-rails .b-show{ right:6px; top:110px; width:calc(var(--rw) - 12px); height:46px; }
-#bar.bar-rails .label{ left:var(--rw); top:calc(var(--sh) + 3px); height:calc(var(--rh) - 6px); width:calc(var(--sw) - 6*var(--slot) - 80px); justify-content:flex-start; padding-left:4px; }
-#bar.bar-rails .inv{ right:var(--rw); top:calc(var(--sh) + 3px); height:calc(var(--rh) - 6px); width:calc(6*var(--slot) + 72px); }
+#bar.bar-rails .label{ left:var(--rw); top:calc(var(--sh) + 3px); height:calc(var(--rh) - 6px); width:calc(var(--sw) - 6*var(--slot) - 100px); justify-content:flex-start; padding-left:4px; }
+#bar.bar-rails .inv{ right:var(--rw); top:calc(var(--sh) + 3px); height:calc(var(--rh) - 6px); width:calc(6*var(--slot) + 92px); }
 #bar.bar-rails .arrow{ width:30px; flex:none; }
 #stage.t #bar.bar-std .arrow{ width:max(28px, calc(var(--u)*12)); flex:none; }
 #stage.t .mapfoot .row.mini{ min-height:40px; min-width:64px; }
 #bar.bar-rails .self canvas{ top:2px; width:calc(var(--rw) - 16px); height:auto; }
-#bar.bar-rails .slot canvas{ width:40px; height:30px; }
+#bar.bar-rails .slot{ min-width:0; }
+#bar.bar-rails .slot canvas{ width:min(40px, calc(100% - 4px)); height:auto; aspect-ratio:4/3; }
 #stage.t #bar.bar-rails .label.big-v{ left:var(--rw); width:var(--sw); top:calc(var(--sh) - 50px); height:46px; padding-left:0; justify-content:center; background:rgba(8,7,13,.92); border:1px solid var(--s5); box-sizing:border-box; }
 #stage.m-rails #bar .btn{ font-size:max(16px, calc(var(--u)*8)); }
 
@@ -169,7 +171,7 @@ button:focus{ outline:none; } button:focus-visible{ outline:calc(var(--u)*1) sol
 .title .tfoot{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*3); color:var(--s3); font-size:.8em; text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 var(--k0); }
 #stage.m-rails .title .tmenu{ top:auto; bottom:calc(var(--u)*6); }
 /* Kleine Telefone im Standardlayout: obere Knopfreihe höher, Inventarreihe etwas flacher */
-#stage.t.short #bar.bar-std .b-notes, #stage.t.short #bar.bar-std .b-map, #stage.t.short #bar.bar-std .b-show, #stage.t.short #bar.bar-std .b-menu, #stage.t.short #bar.bar-std .label{ top:calc(var(--u)*1); height:calc(var(--u)*19); }
+#stage.t.short #bar.bar-std .b-notes, #stage.t.short #bar.bar-std .b-map, #stage.t.short #bar.bar-std .b-show, #stage.t.short #bar.bar-std .b-menu, #stage.t.short #bar.bar-std .label{ top:calc(var(--u)*2); height:calc(var(--u)*18); }
 #stage.t.short #bar.bar-std .self, #stage.t.short #bar.bar-std .inv{ top:calc(var(--u)*22); height:calc(var(--u)*33); }
 /* Niedrige Bühne (Telefon quer): Titelmenü zweispaltig, damit alle Punkte ohne Scrollen sichtbar sind */
 #stage.short .title .tmenu{ display:grid; grid-template-columns:1fr 1fr; column-gap:calc(var(--u)*2); width:calc(var(--u)*236); top:auto; bottom:calc(var(--u)*15); }

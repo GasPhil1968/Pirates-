@@ -116,6 +116,9 @@ UI.refreshLabel = function(){ var lab = $('label'); if (!lab) return; if (touchV
 
 // ---------------------------------------------------------------- Verben
 var touchVerbs = null;   // {hs, verbs} solange die Leiste Verbknöpfe zeigt
+// Nach einem Fingertipp schickt der Browser noch einen Klick an dieselbe Stelle. Liegt dort ein gerade erst geöffneter Knopf,
+// würde er ungewollt ausgelöst. Deshalb nehmen frisch geöffnete Menüs nach einem Fingertipp kurz keine Klicks an.
+var guardUntil = 0; function armGuard(){ if (UI.touch) guardUntil = performance.now()+200; } function guarded(){ return performance.now() < guardUntil; }
 UI.closeVerbs = function(){ var vp = $('verbpop'); vp.innerHTML = ''; vp.classList.remove('on'); touchVerbs = null; E.selectedHs = null; var lab = $('label'); if (lab) lab.classList.remove('big-v'); UI.refreshLabel(); };
 UI.verbsOpen = function(){ return !!touchVerbs || $('verbpop').classList.contains('on'); };
 UI.openVerbs = function(h, sx, sy){ var verbs = MA.verbsOf(h); var name = E.hsName(h);
@@ -123,24 +126,24 @@ UI.openVerbs = function(h, sx, sy){ var verbs = MA.verbsOf(h); var name = E.hsNa
   E.selectedHs = h;
   if (UI.touch){ touchVerbs = { hs: h, verbs: verbs }; var lab = $('label'); lab.innerHTML = ''; lab.classList.add('big-v');
     lab.appendChild(el('span', 'lt nm', esc(name)));
-    verbs.forEach(function(v){ var b = el('button', 'btn vb', esc(MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); MA.doVerb(v, h); }; lab.appendChild(b); });
-    var x = el('button', 'btn bx', '✕'); x.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); }; lab.appendChild(x);
-    return; }
+    verbs.forEach(function(v){ var b = el('button', 'btn vb', esc(MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); if (guarded()) return; UI.closeVerbs(); MA.doVerb(v, h); }; lab.appendChild(b); });
+    var x = el('button', 'btn bx', '✕'); x.onclick = function(ev){ ev.stopPropagation(); if (guarded()) return; UI.closeVerbs(); }; lab.appendChild(x);
+    armGuard(); return; }
   var vp = $('verbpop'); vp.innerHTML = ''; var box = el('div', 'pop'); box.appendChild(el('div', 'ph', esc(name)));
-  verbs.forEach(function(v){ var b = el('button', 'pv', esc(MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); MA.doVerb(v, h); }; box.appendChild(b); });
-  vp.appendChild(box); vp.classList.add('on');
-  var u = L.u, bw = 86*u, bh = (12+verbs.length*12)*u, px = sx*u+6, py = sy*u-bh/2;
-  if (px+bw > 320*u) px = sx*u-bw-6; if (py < 2*u) py = 2*u; if (py+bh > 142*u) py = 142*u-bh;
+  verbs.forEach(function(v){ var b = el('button', 'pv', esc(MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); if (guarded()) return; UI.closeVerbs(); MA.doVerb(v, h); }; box.appendChild(b); });
+  vp.appendChild(box); vp.classList.add('on'); armGuard();
+  var u = L.u, bw = box.offsetWidth, bh = box.offsetHeight, px = sx*u+6, py = sy*u-bh/2;
+  if (px+bw > 320*u) px = Math.max(2*u, sx*u-bw-6); if (py < 2*u) py = 2*u; if (py+bh > 142*u) py = Math.max(2*u, 142*u-bh);
   box.style.left = px+'px'; box.style.top = py+'px'; };
 // Gegenstand angetippt: Auswahl (Benutze … mit …) und kleines Menü mit Schau an / Lies / Öffne
 UI.itemMenu = function(id, slot){ var verbs = MA.itemVerbs(id), vp = $('verbpop'); vp.innerHTML = '';
   var box = el('div', 'pop'); box.appendChild(el('div', 'ph', esc(MA.itemName(id))));
-  verbs.forEach(function(v){ var b = el('button', 'pv', esc(v === 'use' ? 'Benutze' : MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); UI.closeVerbs(); if (v === 'use' && !MA.ITEMS[id].use){ E.selected = id; UI.refreshBar(); return; } if (v === 'use'){ E.selected = null; UI.refreshBar(); MA.itemVerb(id, 'use'); return; } E.selected = null; UI.refreshBar(); MA.itemVerb(id, v); }; box.appendChild(b); });
-  vp.appendChild(box); vp.classList.add('on');
-  var sr = slot.getBoundingClientRect(), vr = vp.getBoundingClientRect(), u = L.u;
-  var px = (sr.left-vr.left), bh = (12+verbs.length*12)*u; var py = (sr.top-vr.top)-bh-2*u;
+  verbs.forEach(function(v){ var b = el('button', 'pv', esc(v === 'use' ? 'Benutze' : MA.VLABEL[v])); b.onclick = function(ev){ ev.stopPropagation(); if (guarded()) return; UI.closeVerbs(); if (v === 'use' && !MA.ITEMS[id].use){ E.selected = id; UI.refreshBar(); return; } if (v === 'use'){ E.selected = null; UI.refreshBar(); MA.itemVerb(id, 'use'); return; } E.selected = null; UI.refreshBar(); MA.itemVerb(id, v); }; box.appendChild(b); });
+  vp.appendChild(box); vp.classList.add('on'); armGuard();
+  var sr = slot.getBoundingClientRect(), vr = vp.getBoundingClientRect(), u = L.u, bw = box.offsetWidth, bh = box.offsetHeight;
+  var px = (sr.left-vr.left), py = (sr.top-vr.top)-bh-2*u;
   if (L.rot){ px = 8*u; py = 60*u; }
-  px = Math.max(2*u, Math.min(px, 320*u-90*u)); if (py < 2*u) py = 2*u;
+  px = Math.max(2*u, Math.min(px, 320*u-bw-2*u)); if (py < 2*u) py = 2*u;
   box.style.left = px+'px'; box.style.top = py+'px'; };
 function bindSlot(s, i){ var down = null;
   s.addEventListener('pointerdown', function(ev){ ev.preventDefault(); var id = s.dataset.item; if (!id || E.busy || UI.modal()) return; down = { x: ev.clientX, y: ev.clientY, id: id, drag: false }; try { s.setPointerCapture(ev.pointerId); } catch(e){} });

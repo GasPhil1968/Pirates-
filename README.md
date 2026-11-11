@@ -4,7 +4,8 @@ Point-and-Click-Adventure im Browser, deutsch. Erste spielbare Umsetzung aus dem
 
 ## Starten
 - `game/index.html` im Browser öffnen, oder `python3 -m http.server` im Ordner `game/` und `http://localhost:8000` aufrufen.
-- Auslieferung: `dist/M_Adventure_Mostar_netlify.zip` (Spiel + `LIESMICH.txt`). Für Netlify Drop entpacken und den Ordner auf app.netlify.com/drop ziehen. Nicht veröffentlicht.
+- Auslieferung: `dist/M_Adventure_Mostar_netlify.zip` (nur das Spiel + `LIESMICH.txt`). Für Netlify Drop entpacken und den Ordner auf app.netlify.com/drop ziehen. Nicht veröffentlicht.
+- Vollständiges Projekt zum Weiterarbeiten: `dist/M_Adventure_Mostar_Projekt.zip` (Spiel, Dokumentation, Testwerkzeuge).
 
 ## Aufbau
 | Pfad | Inhalt |

@@ -5,6 +5,7 @@
 2. Setzt MA.BUILD in game/js/engine/core.js auf „TT.MM.JJJJ · abc123“ (Datum bleibt, solange sich nichts ändert).
 3. Erzeugt game/sw.js mit Dateiliste und Cache-Namen „madv-mostar-<Fingerabdruck>“ (getrennt von MALA).
 4. Packt dist/M_Adventure_Mostar_netlify.zip: Inhalt von game/ auf oberster Ebene + LIESMICH.txt (aus docs/LIESMICH.txt).
+5. Packt dist/M_Adventure_Mostar_Projekt.zip: README, game/, docs/, tools/ (vollständiges Projekt zum Weiterarbeiten).
 
 Aufruf: python3 -I tools/build.py
 """
@@ -20,6 +21,7 @@ DIST = os.path.join(ROOT, 'dist')
 CORE = 'js/engine/core.js'
 BUILD_RE = re.compile(r"MA\.BUILD = '([^']*)';")
 ZIPNAME = 'M_Adventure_Mostar_netlify.zip'
+PROJNAME = 'M_Adventure_Mostar_Projekt.zip'
 
 SW = """/* M. Adventure – Service Worker (Offline-Fassung). Von tools/build.py erzeugt, nicht von Hand ändern.
    Eigener Cache-Name „madv-mostar-…“: Caches anderer Projekte (z. B. MALA) werden nie angefasst. */
@@ -107,6 +109,24 @@ def main():
             z.write(os.path.join(GAME, rel), rel)
         z.writestr('LIESMICH.txt', readme.replace('\n', '\r\n'))
     print('Fassung', build, '·', len(files), 'Dateien ·', target, os.path.getsize(target), 'Bytes')
+
+    # Vollständiges Projekt (Quellen, Dokumentation, Werkzeuge) – zum Weiterarbeiten, nicht zum Hochladen
+    proj = os.path.join(DIST, PROJNAME)
+    if os.path.exists(proj):
+        os.remove(proj)
+    with zipfile.ZipFile(proj, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+        for top in ['README.md', '.gitignore']:
+            if os.path.exists(os.path.join(ROOT, top)):
+                z.write(os.path.join(ROOT, top), 'M_Adventure_Mostar/' + top)
+        for sub in ['game', 'docs', 'tools']:
+            for d, dirs, fs in os.walk(os.path.join(ROOT, sub)):
+                dirs[:] = sorted(x for x in dirs if x not in ('node_modules', '__pycache__'))
+                for f in sorted(fs):
+                    if f.startswith('.') or f.endswith('.pyc'):
+                        continue
+                    full = os.path.join(d, f)
+                    z.write(full, 'M_Adventure_Mostar/' + os.path.relpath(full, ROOT).replace(os.sep, '/'))
+    print('Projektarchiv', proj, os.path.getsize(proj), 'Bytes')
 
 
 if __name__ == '__main__':

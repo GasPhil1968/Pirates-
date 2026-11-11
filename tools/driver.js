@@ -40,7 +40,7 @@ class Driver {
   async ensureVisible(id) { for (let k = 0; k < 6; k++) { const p = await this.page.evaluate((i) => MADV.hsScreen(i), id); if (!p) throw new Error('Stelle nicht sichtbar/vorhanden: ' + id); if (p.inView) return p;
       const r = await this.page.evaluate(() => MADV.sceneRect()); const left = p.x < r.x; await this.tap(left ? r.x + 12 : r.x + r.w - 12, r.y + r.h - 10); await this.page.waitForTimeout(400); await this.idle(); }
     throw new Error('Kamera erreicht ' + id + ' nicht'); }
-  async clickHs(id) { const p = await this.ensureVisible(id); await this.tap(p.x, p.y); await this.page.waitForTimeout(220); }
+  async clickHs(id) { const p = await this.ensureVisible(id); await this.tap(p.x, p.y); await this.page.waitForTimeout(300); }
   // Verb an einer Stelle: Klick → Verbmenü (Maus) bzw. Verbknöpfe (Touch) → Verb wählen; nur "Schau an" läuft direkt
   async verb(id, label) { await this.idle(); await this.clickHs(id);
     const sel = this.touch ? '#label .vb' : '#verbpop .pv';
@@ -63,7 +63,7 @@ class Driver {
   async combine(a, b) { await this.select(a); const s = await this.slot(b); await this.press(s); await this.page.waitForTimeout(200); return this.idle(); }
   async useSelf(a) { await this.select(a); await this.press(this.page.locator('#b-self')); await this.page.waitForTimeout(200); return this.idle(); }
   // Gegenstand wählen, ein zweites Mal antippen (öffnet das kleine Menü) und die Handlung wählen
-  async itemVerb(item, label) { await this.select(item); const s = await this.slot(item); await this.press(s); await this.page.waitForTimeout(200);
+  async itemVerb(item, label) { await this.select(item); const s = await this.slot(item); await this.press(s); await this.page.waitForTimeout(320);
     const b = this.page.locator('#verbpop .pv', { hasText: label }); if (!(await b.count())) throw new Error(`Handlung "${label}" für ${item} fehlt: ` + (await this.page.locator('#verbpop .pv').allTextContents()).join(', '));
     await this.press(b.first()); await this.page.waitForTimeout(200); return this.idle(); }
   async exit(id, room) { await this.idle(); await this.clickHs(id); await this.page.waitForTimeout(300); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Ausgang ${id}: erwartet ${room}, bin in ${s.room}`); return s; }

@@ -31,6 +31,8 @@ BEDIENUNG
   Knöpfe). Boden antippen: hingehen. Ausgang zweimal antippen: sofort hin.
 - Gegenstand antippen -> „Benutze … mit …“ -> Ziel antippen (Stelle, Person,
   anderer Gegenstand oder M.s Bild). Gegenstände lassen sich auch ziehen.
+  Gewählten Gegenstand noch einmal antippen (oder „Ansehen“): ansehen, lesen,
+  öffnen. ✕ oder ein Tipp auf freien Boden hebt die Wahl auf.
 - Notizen: was M. gerade beschäftigt (keine Lösungen). Karte: bekannte Orte.
   Zeigen: markiert kurz alle Stellen im Bild.
 - Tastatur: Esc Menü/Schließen · Leertaste/Enter weiter · 1–9 Antworten ·
@@ -53,5 +55,5 @@ css/, fonts/          Gestaltung und Schriften (Pixel-Schrift, Atkinson Hyperleg
 sw.js, manifest.webmanifest, icon-*.png   Offline-Fassung und App-Symbol
 
 Entwicklerdokumentation (Quellenanalyse, Kapitelentwurf, Prüfbericht,
-Lösungsweg) liegt bewusst nicht in diesem Ordner, sondern im Projektarchiv
-unter docs/, damit sie nicht mit dem Spiel veröffentlicht wird.
+Lösungsweg) liegt bewusst nicht in diesem Ordner, damit sie nicht mit dem
+Spiel veröffentlicht wird: siehe M_Adventure_Mostar_Projekt.zip, Ordner docs/.

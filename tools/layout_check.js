@@ -15,6 +15,7 @@ const DEVICES = ['Desktop 1280x800', 'Desktop 1024x640', 'iPad (gen 7) landscape
     const shot = async (n) => d.page.screenshot({ path: `${out}/${tag}_${n}.png` });
     // Überläufe: Elemente außerhalb der Bühne oder mit abgeschnittenem Text
     const check = async (where) => { const r = await d.page.evaluate(() => { const st = document.getElementById('stage').getBoundingClientRect(), bad = [];
+        if (document.getElementById('rotate').classList.contains('on')) return { bad, mode: 'Hochformat-Hinweis deckt die Bühne ab', size: Math.round(st.width) + '×' + Math.round(st.height) };
         const vis = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
         document.querySelectorAll('#stage button, #stage .row, #stage .co, #stage .lt, #stage .tb, #stage .mloc, #stage .pb').forEach((e) => { if (!vis(e)) return; let p = e; while (p && p !== document.body) { if (!vis(p)) return; p = p.parentElement; }
           const b = e.getBoundingClientRect(), t = (e.textContent || '').trim().slice(0, 30);
@@ -27,7 +28,7 @@ const DEVICES = ['Desktop 1280x800', 'Desktop 1024x640', 'iPad (gen 7) landscape
         return { bad, mode: document.getElementById('stage').className, size: Math.round(st.width) + '×' + Math.round(st.height) }; });
       if (r.bad.length) { problems += r.bad.length; console.log(`  ${where}: ` + r.bad.join(' | ')); } return r; };
     const lay = await check('Titel'); console.log(`${dev}: Bühne ${lay.size}, ${lay.mode}`); await shot('1_titel');
-    if (dev === 'iPhone 13') { const rot = await d.page.locator('#rotate.on').count(); console.log('  Hochformat-Hinweis sichtbar: ' + (rot ? 'ja' : 'NEIN')); if (!rot) problems++; await shot('2_hoch'); await d.page.locator('#rot-ok').click(); await d.page.waitForTimeout(400); await shot('3_hoch_gedreht'); await d.close(); continue; }
+    if (dev === 'iPhone 13') { const rot = await d.page.locator('#rotate.on').count(); console.log('  Hochformat-Hinweis sichtbar: ' + (rot ? 'ja' : 'NEIN')); if (!rot) problems++; await shot('2_hoch'); await d.page.locator('#rot-ok').click(); await d.page.waitForTimeout(400); await shot('3_hoch_gedreht'); const g = await check('Titel gedreht'); console.log('  gedreht: Bühne ' + g.size + ', ' + g.mode); await d.close(); continue; }
     await d.page.locator('.tmenu .row', { hasText: 'Neues Spiel' }).click(); await d.page.waitForTimeout(500); await d.idle();
     await shot('2_s01'); await check('S01-Antworten'); await d.choose('Ich gehe zum Lehrer');
     await d.clickHs('branko'); await d.page.waitForTimeout(250); await shot('3_verben_branko'); await check('Verben Branko');
