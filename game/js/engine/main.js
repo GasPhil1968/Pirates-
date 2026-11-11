@@ -75,9 +75,13 @@ MA.boot = function(){
   $('rot-ok').onclick = function(){ UI.rotOk = true; try { localStorage.setItem(MA.KEY+'rotOk', '1'); } catch(e){} UI.layout(); };
   document.addEventListener('visibilitychange', function(){ if (document.hidden && E.screen === 'game') MA.saveTo('auto'); });
   window.addEventListener('pagehide', function(){ if (E.screen === 'game') MA.saveTo('auto'); });
-  UI.openTitle();
+  // Als Artefakt auf claude.ai: Aktualisierungen der Seite übernehmen ein laufendes Spiel (window.claude.hot), sonst Titelbild
+  var hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.snapshot === 'function') hot.snapshot(function(){ if (E.screen !== 'game' || !MA.GS || !MA.GS.room || MA.GS.ended) return {}; if (E.syncPos && !E.busy) E.syncPos(); return { env: { v: 1, GS: (E.busy && E.safeGS) ? E.safeGS : MA.GS } }; });
+  var start = function(data){ if (data && data.env && data.env.GS && MA.loadEnv(data.env)){ UI.toast('Weitergespielt nach der Aktualisierung.'); return; } UI.openTitle(); };
+  if (hot && typeof hot.ready === 'function') hot.ready(start); else start((hot && hot.data) || {});
   requestAnimationFrame(frame);
-  registerOffline();
+  if (!window.MADV_ARTIFACT) registerOffline();
 };
 // Offline-Fassung (wie in MALA): Service Worker nur über http(s) und nicht auf dem Entwicklungsrechner. Meldet „Offline bereit“,
 // sobald alle Dateien im Cache liegen; eine neue Fassung wird auf dem Titelbild neu geladen (Spielstände bleiben, sie liegen in localStorage).

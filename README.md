@@ -27,6 +27,7 @@ node tools/layout_check.js /tmp/lay               # Layout auf acht Geräteprofi
 node tools/map_check.js                           # Karte: Freigaben und Sperren
 node tools/render_chars.js /tmp/figuren.png 6     # Prüfblatt aller Figuren ohne Browser
 python3 tools/build.py                            # Fassung setzen, sw.js erzeugen, ZIP bauen
+python3 tools/build_artifact.py /tmp/m-adventure.html   # Einzelseite für ein claude.ai-Artefakt (alles inline, ohne Service Worker)
 ```
 Die Durchläufe bedienen das Spiel nur über die Oberfläche; `window.MADV` liefert ihnen ausschließlich Positionen und Zustände zum Prüfen.
 
