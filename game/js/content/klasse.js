@@ -63,7 +63,7 @@ async function sketch(A){ if (!F('coat.known')){ await A.say('Ich zeichne doch n
 function takeChalk(A){ A.set('kreide.taken'); A.give('kreide'); MA.touch(); }
 
 // ---------------------------------------------------------------- Probe (im Schulhof): attempt 1 = nach dem Beutel, 2 = Wiederholung
-MA.rehearsal = async function(A, attempt){
+MA.rehearsal = async function(A, attempt){ MA.E.cutscene = true;
   await A.fade(1, 300); await A.goto('hof', { fade: false, noEnter: true, x: 92, y: 132, f: 'R', noSave: true });
   var L = A.spawn({ id: 'lehrer', ch: 'lehrer', x: 86, y: 124, f: 'L', idle: 'coatHold', talk: 'coatTalk', hgt: 50 });
   A.npc('jasna').place(30, 130, 'B'); A.npc('nedim').place(46, 133, 'B'); A.npc('kidA').place(16, 131, 'B'); A.npc('kidB').place(60, 130, 'B'); A.npc('kidC').place(74, 133, 'B');
@@ -95,13 +95,13 @@ MA.defineRoom({ id: 'klasse', name: 'Klassenzimmer', indoor: true, width: 320,
   walk: [[[64, 99], [256, 99], [272, 106], [298, 116], [318, 122], [318, 142], [4, 142], [4, 126], [44, 104]]],
   holes: function(S, G){ return [[20, 113, 78, 20], [178, 108, 122, 9], [182, 120, 138, 10], [188, 132, 132, 12], [252, 100, 30, 9]]; },
   start: [72, 104, 'R'], entries: { hof: [72, 104, 'R'], fenster: [246, 104, 'R'], map: [72, 104, 'R'] },
-  actors: function(S, G){ return [{ id: 'lehrer', ch: 'lehrer', x: 100, y: 110, f: 'R', idle: 'coatHold', talk: 'coatTalk', hgt: 50 }]; },
+  actors: function(S, G){ return [{ id: 'lehrer', ch: 'lehrer', x: 124, y: 110, f: 'L', idle: 'coatHold', talk: 'coatTalk', hgt: 50 }]; },
   enter: async function(A, from){ if (F('bust.moved') && !F('s28.seen') && MA.ACT.lehrer){ A.set('s28.seen'); var L = A.npc('lehrer');
       await L.say('Warum steht er am Fenster?'); await A.say('Damit der Riegel oben bleibt.'); await L.say('Das ist nicht seine ursprüngliche Aufgabe.'); await A.say('Er hält auch sonst Papier fest.'); await A.wait(600); await L.say('Pass auf den Sockel auf.'); await A.say('Ich passe auf alles auf, was daran hängt.'); } },
   hotspots: [
     { id: 'tuer', name: 'Tür zum Hof', r: K.door, st: [66, 104, 'L'], exit: { to: 'hof' } },
     { id: 'fenster', name: 'Fenster zum Hinterhof', r: K.win, st: [248, 104, 'R'], exit: { to: 'fenster' } },
-    { id: 'lehrer', npc: 'lehrer', hgt: 50, st: [124, 110, 'L'], talk: lehrerTalk,
+    { id: 'lehrer', npc: 'lehrer', hgt: 50, st: [146, 110, 'L'], talk: lehrerTalk,
       look: async function(A){ await A.say('Der Lehrer. Er hält seinen Mantel die ganze Zeit mit einer Hand zu. Oben fehlt ein Knopf.'); A.set('coat.seen'); },
       on: { raster: s06, beutel: s16, auftrag: async function(A){ await A.npc('lehrer').say('Den Auftrag hast du. Zu Mara damit.'); }, heft: sketch, bleistift: sketch, skizze: 'Die Skizze stimmt. Jetzt fehlt nur noch der Knopf.',
         abrieb: async function(A){ A.set('spoon.asked'); await s10(A); }, loeffel: async function(A){ await A.npc('lehrer').say('Der „Frühstückslöffel“? Den hat Dedo hergegeben?'); await A.say('Wegen seiner Garantie.'); await A.npc('lehrer').say('Dann hat er heute etwas gelernt. Und du auch.'); },

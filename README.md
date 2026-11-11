@@ -11,8 +11,8 @@ Point-and-Click-Adventure im Browser, deutsch. Erste spielbare Umsetzung aus dem
 | Pfad | Inhalt |
 | --- | --- |
 | `game/js/lib/` | Grafik- und Figurentechnik aus MALA (indizierte Palette, Malkasten, Figuren-Rig), unverändert übernommen bis auf den Spieltitel |
-| `game/js/engine/` | Engine von M. Adventure: Zustand und Spielstände (`core.js`), Räume/Wege/Darstellung (`world.js`), Skript-API und Interaktion (`script.js`), Oberfläche (`ui.js`, `ui_panels.js`), Start und Eingabe (`main.js`) |
-| `game/js/art/` | Figuren, Porträts, Gegenstandssymbole, Hintergründe der Orte, Titelbild und Stadtplan |
+| `game/js/engine/` | Engine von M. Adventure: Zustand und Spielstände (`core.js`), Räume/Wege/Darstellung (`world.js`), Skript-API und Interaktion (`script.js`), Eigenleben der Figuren (`life.js`), Statisten und Bewegung im Hintergrund (`extras.js`), Oberfläche (`ui.js`, `ui_panels.js`), Start und Eingabe (`main.js`) |
+| `game/js/art/` | Detail-Zeichner für das MALA-Rig (`rig_detail.js`), Köpfe (`heads.js`), Bewegungen (`anims.js`), Figuren (`cast.js`), Porträts, Gegenstandssymbole, Hintergründe der Orte mit Zusatzdetails (`details.js`), Titelbild und Stadtplan |
 | `game/js/content/` | Inhalte: Gegenstände und Kombinationen, Notizen, Rätsel-Nahansichten, Orte mit Hotspots und Dialogen, Kapitelablauf |
 | `docs/` | A Quellenanalyse · B Gesamtstruktur · C Kapitelentwurf Mostar · C2 Styleguide · F Prüfbericht · F Lösungsweg · LIESMICH (Startanleitung für das ZIP) |
 | `tools/` | Testfahrer und Durchläufe (Playwright), Layoutprüfung, Prüfblätter für Räume und Figuren, Icon-Erzeugung, Build |
@@ -24,6 +24,8 @@ node tools/playthrough.js /tmp/pt                 # Durchlauf A, Desktop
 node tools/playthrough.js /tmp/pt "iPhone 13 landscape"   # Durchlauf A, Touch
 node tools/playthrough_b.js /tmp/ptb              # Durchlauf B: andere Reihenfolge, Fehlversuche, Speichern/Laden
 node tools/layout_check.js /tmp/lay               # Layout auf acht Geräteprofilen
+node tools/map_check.js                           # Karte: Freigaben und Sperren
+node tools/render_chars.js /tmp/figuren.png 6     # Prüfblatt aller Figuren ohne Browser
 python3 tools/build.py                            # Fassung setzen, sw.js erzeugen, ZIP bauen
 ```
 Die Durchläufe bedienen das Spiel nur über die Oberfläche; `window.MADV` liefert ihnen ausschließlich Positionen und Zustände zum Prüfen.

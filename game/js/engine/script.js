@@ -14,7 +14,7 @@ MA.clearTimers = function(){ timers.length = 0; };
 // ---------------------------------------------------------------- Szene läuft
 E.safeGS = null;
 E.setBusy = function(v){ v = !!v; if (v && !E.busy && E.room){ try { E.syncPos(); E.safeGS = JSON.parse(JSON.stringify(MA.GS)); } catch(e){} }
-  E.busy = v; if (!v){ E.safeGS = null; if (E.pendingSave){ E.pendingSave = false; MA.saveTo('auto'); } } if (MA.UI && MA.UI.onBusy) MA.UI.onBusy(v); };
+  E.busy = v; if (!v){ E.safeGS = null; E.cutscene = false; if (MA.lifeSceneEnd) MA.lifeSceneEnd(); if (E.pendingSave){ E.pendingSave = false; MA.saveTo('auto'); } } if (MA.UI && MA.UI.onBusy) MA.UI.onBusy(v); };
 async function scene(fn){ if (E.busy) return; E.setBusy(true); try { await fn(); } catch(e){ console.error(e); } finally { E.setBusy(false); } }
 MA.scene = scene;
 
@@ -51,7 +51,10 @@ async function menu(getOpts){ var r0 = E.room;
 function nsKey(k){ return (E.room ? E.room.id : '')+':'+k; }
 function first(k){ var key = k[0] === '!' ? k.slice(1) : nsKey(k); if (MA.GS.seen[key]) return false; MA.GS.seen[key] = 1; return true; }
 function cycle(k, arr){ var key = nsKey(k), i = MA.GS.cyc[key] || 0; MA.GS.cyc[key] = (i+1) % arr.length; return arr[i % arr.length]; }
-function npc(id){ var a = function(){ return MA.ACT[id]; };
+// Eine Szene übernimmt die Figur: laufende Eigenleben-Einlagen enden, ohne dass sie später Blickrichtung oder Haltung zurücksetzen
+function claim(b){ if (!b) return b; if (E.busy) b.scripted = true; var L = b.life; if (L){ if (L.anim){ L.anim = false; if (L.saveItem !== undefined){ b.item = L.saveItem; L.saveItem = undefined; } L.saveF = null; if (b.mode === 'anim') MA.setIdle(b); } L.watching = false; L.cancel = true; } return b; }
+MA.claimActor = claim;
+function npc(id){ var a = function(){ return claim(MA.ACT[id]); };
   return {
     get actor(){ return a(); }, get x(){ return a() ? a().x : 0; }, get y(){ return a() ? a().y : 0; },
     say: function(t, o){ return say(t, id, o); },
@@ -126,6 +129,9 @@ MA.cancelAction = function(){ tok++; };
 // Verb auf eine Stelle anwenden (Laufen, dann Handlung)
 MA.doVerb = async function(v, h){ if (E.busy || E.transit) return; var my = ++tok;
   if (h.exit){ return MA.takeExit(h); }
+  E.partner = h.npc || null; if (h.npc) claim(MA.ACT[h.npc]);
+  try { await doVerb2(v, h, my); } finally { if (!E.busy) E.partner = null; } };
+async function doVerb2(v, h, my){
   if (v === 'go'){ var p = MA.ACT.m, st = E.hsStand(h); if (p && st) await MA.walkActor(p, st[0], st[1]); return; }
   var ok = await approach(h); if (!ok || my !== tok || E.busy) return;
   if (h.npc){ var b = MA.ACT[h.npc]; if (b && v === 'talk'){ var p2 = MA.ACT.m; if (p2) MA.faceActor(b, p2.x < b.x ? 'L' : 'R'); } }
@@ -145,7 +151,8 @@ MA.skipExitWalk = function(id){ var w = E.exitWalk, p = MA.ACT.m; if (!w || w.id
 // target: {hs} Stelle/Person · {item} anderer Gegenstand · {self:true} M. selbst
 MA.useItem = async function(id, target){ if (E.busy || E.transit) return; var it = MA.ITEMS[id]; if (!it) return; var my = ++tok; E.selected = null; if (MA.UI) MA.UI.refreshBar();
   if (target.hs){ var h = target.hs; if (h.exit){ await scene(async function(){ await say(cycle('def:usewith', DEF.usewith), 'm'); }); return; }
-    var ok = await approach(h); if (!ok || my !== tok || E.busy) return;
+    if (h.npc){ E.partner = h.npc; claim(MA.ACT[h.npc]); }
+    var ok = await approach(h); if (!ok || my !== tok || E.busy){ if (!E.busy) E.partner = null; return; }
     await scene(async function(){ var on = h.on || {}, hv = on[id]; if (hv === undefined && it.on) hv = it.on[h.id]; if (hv === undefined) hv = on['*'];
       if (typeof hv === 'function' && on[id] === undefined && it.on && it.on[h.id] === undefined && on['*'] !== undefined){ await hv(A, { item: id, hs: h }); return; }
       if (await respond(hv, { key: 'use:'+id+':'+h.id, hs: h, item: id })) return;

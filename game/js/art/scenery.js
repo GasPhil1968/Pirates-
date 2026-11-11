@@ -75,12 +75,12 @@ SC.kaldrma = function(b, x0, y0, w, h, opt){ opt = opt || {}; var r = opt.ramp |
 SC.slabs = function(b, x0, y0, w, h, r){ r = r || R('s2 s3 s4 s5'); for (var y = y0; y < y0+h; y++) for (var x = x0; x < x0+w; x++) b.px(x, y, M.tex.paving(x, y, r, 12+Math.round((y-y0)/h*8))); };
 
 // ---------------------------------------------------------------- Fahnen, Girlanden, Transparente, Plakat
-SC.flagYU = function(b, x, y, w, h){ var t = Math.round(h/3); b.rect(x, y, w, t, P.b2); b.rect(x, y+t, w, h-2*t, P.s6); b.rect(x, y+h-t, w, t, P.r3); var cx = x+Math.floor(w/2), cy = y+Math.floor(h/2);
+SC.flagYU = function(b, x, y, w, h){ if (SC.rec){ SC.rec.push({ k: 'flag', x: x, y: y, w: w, h: h, ph: x*0.37 }); return; } var t = Math.round(h/3); b.rect(x, y, w, t, P.b2); b.rect(x, y+t, w, h-2*t, P.s6); b.rect(x, y+h-t, w, t, P.r3); var cx = x+Math.floor(w/2), cy = y+Math.floor(h/2);
   b.px(cx, cy-1, P.r3); b.hl(cx-1, cx+1, cy, P.r3); b.px(cx-1, cy+1, P.r3); b.px(cx+1, cy+1, P.r3); if (w > 9){ b.px(cx, cy-2, P.y3); } };
-SC.flagPole = function(b, x, gy, h, fw, fh, wave){ b.vl(x, gy-h, gy, P.w2); b.vl(x+1, gy-h, gy, P.w1); b.px(x, gy-h-1, P.y3);
+SC.flagPole = function(b, x, gy, h, fw, fh, wave){ b.vl(x, gy-h, gy, P.w2); b.vl(x+1, gy-h, gy, P.w1); b.px(x, gy-h-1, P.y3); if (SC.rec){ SC.rec.push({ k: 'flag', x: x+2, y: gy-h, w: fw, h: fh, ph: wave || 0, pole: true }); return; }
   var t = Math.round(fh/3); for (var i = 0; i < fw; i++){ var dy = wave ? Math.round(Math.sin(i*0.6+wave)*1) : 0; for (var j = 0; j < fh; j++){ var c = j < t ? P.b2 : (j < fh-t ? P.s6 : P.r3); b.px(x+2+i, gy-h+j+dy, c); } }
   var cx = x+2+Math.floor(fw/2), cy = gy-h+Math.floor(fh/2); b.px(cx, cy, P.r3); b.px(cx-1, cy, P.r3); b.px(cx+1, cy, P.r3); b.px(cx, cy-1, P.r3); };
-SC.garland = function(b, x0, y0, x1, y1, sag, seed){ var n = Math.abs(x1-x0), cols = [P.b2, P.s6, P.r3]; sag = sag || 6;
+SC.garland = function(b, x0, y0, x1, y1, sag, seed){ if (SC.rec){ SC.rec.push({ k: 'garland', x0: x0, y0: y0, x1: x1, y1: y1, sag: sag || 6, ph: (x0+y0)*0.13 }); return; } var n = Math.abs(x1-x0), cols = [P.b2, P.s6, P.r3]; sag = sag || 6;
   for (var i = 0; i <= n; i++){ var t = i/n, x = Math.round(x0+(x1-x0)*t), y = Math.round(y0+(y1-y0)*t+Math.sin(Math.PI*t)*sag); b.px(x, y, P.k2);
     if (i % 6 === 2){ var c = cols[Math.floor(i/6) % 3]; b.px(x, y+1, c); b.px(x+1, y+1, c); b.px(x+2, y+1, c); b.px(x+1, y+2, c); b.px(x+1, y+3, c); } } };
 SC.banner = function(b, x, y, w, h, text, col){ col = col || P.r3; b.rect(x, y, w, h, col); b.hl(x, x+w-1, y, M.UP[col]); b.hl(x, x+w-1, y+h-1, M.DN[col]); var tw = M.microWidth(text); M.microText(b, text, x+Math.floor((w-tw)/2), y+Math.floor((h-5)/2), P.s6);
@@ -92,7 +92,7 @@ SC.posterTiko = function(b, x, y, w, h, opt){ opt = opt || {}; b.rect(x, y, w, h
   M.microText(b, opt.text || 'TIKO', cx-Math.floor(M.microWidth(opt.text || 'TIKO')/2), y+h-8, P.r3);
   if (opt.peel){ b.poly([[x+w-1, y], [x+w-1, y+7], [x+w-8, y]], P.s4); b.line(x+w-8, y, x+w-1, y+7, P.s3); } };
 SC.bottle = function(b, x, by, col){ col = col || P.g3; b.rect(x, by-7, 3, 7, col); b.rect(x+1, by-10, 1, 3, col); b.px(x+1, by-11, P.s5); b.vl(x, by-6, by-2, M.UP[col]); b.px(x+2, by-5, M.DN[col]); };
-SC.tree = function(b, cx, gy, opt){ opt = opt || {}; var h = opt.h || 50, cw = opt.w || 34, tr = R('w0 w1 w2 w3'), lf = opt.leaf || R('g1 g2 g3 g4 g5');
+SC.tree = function(b, cx, gy, opt){ opt = opt || {}; var h = opt.h || 50, cw = opt.w || 34, tr = R('w0 w1 w2 w3'), lf = opt.leaf || R('g1 g2 g3 g4 g5'); if (SC.rec) SC.rec.push({ k: 'tree', cx: cx, cy: Math.round(gy-h*0.72), rx: Math.round(cw*0.62), ry: Math.round(h*0.3), lf: lf });
   for (var y = gy-Math.round(h*0.55); y < gy; y++){ var tw = 2+Math.round((y-(gy-h*0.55))/(h*0.55)*2); for (var x = cx-tw; x <= cx+tw; x++) b.px(x, y, x < cx-tw+1 ? tr[3] : (x > cx+tw-1 ? tr[0] : tr[1])); }
   b.line(cx, gy-Math.round(h*0.5), cx-10, gy-Math.round(h*0.75), tr[1]); b.line(cx, gy-Math.round(h*0.5), cx+9, gy-Math.round(h*0.78), tr[1]);
   var rg = M.rng(opt.seed || 21); for (var k = 0; k < 7; k++){ var bx = cx+(rg()-0.5)*cw, by = gy-h*0.72+(rg()-0.5)*h*0.35, rx = cw*0.3+rg()*cw*0.18, ry = rx*0.65;

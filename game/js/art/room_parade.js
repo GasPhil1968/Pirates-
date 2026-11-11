@@ -14,7 +14,12 @@ function paint(S, G){ var W = K.W, b = new M.Buf(W, 144, P.k0);
   // Platanen
   [60, 150, 250, 350].forEach(function(tx, i){ SC.tree(b, tx, 96, { h: 64, w: 46, seed: 70+i, leaf: R('g1 g2 g3 g4 g5') }); });
   // Zuschauer hinter dem Seil
-  for (var x = 0; x < W; x++){ var hy = 82+Math.round(Math.sin(x*1.3)*1+Math.sin(x*0.37)*1.5); for (var y = hy; y < 98; y++){ var col = [P.r3, P.b2, P.s5, P.e3, P.g3, P.w3, P.c2, P.s6][Math.floor(hash(Math.floor(x/4), Math.floor((y-hy)/6)+3)*8)]; if (y < hy+3) col = [P.q3, P.p4, P.q2, P.h1][Math.floor(hash(Math.floor(x/4), 9)*4)]; b.px(x, y, col); } }
+  // hintere Reihen als Silhouetten im Schatten der Platanen (die vordere Reihe lebt: engine/extras.js)
+  var dark = [P.m1, P.e1, P.c1, P.w1, P.r1, P.n1, P.m0, P.g2], skinD = [P.q1, P.p2, P.q2, P.h1];
+  for (var hx = -3; hx < W+6; hx += 6){ var hj = Math.floor(hash(hx, 5)*3), hy0 = 78+hj, col = dark[Math.floor(hash(hx, 7)*dark.length)], sk = skinD[Math.floor(hash(hx, 11)*skinD.length)];
+    for (var y = hy0+4; y < 97; y++) for (var x = hx-3; x <= hx+3; x++){ if (x < 0 || x >= W) continue; var c = col; if (x === hx-3 || (y === hy0+4 && (x === hx-3 || x === hx+3))) c = M.DN[col]; if (bayer(x, y) < 0.18) c = M.DN[c]; b.px(x, y, c); }
+    var hat = hash(hx, 13) < 0.35; for (var yy0 = hy0; yy0 < hy0+4; yy0++) for (var xx0 = hx-1; xx0 <= hx+1; xx0++){ if (xx0 < 0 || xx0 >= W) continue; b.px(xx0, yy0, (yy0 === hy0 && hat) ? P.k2 : (yy0 === hy0 ? P.h1 : sk)); }
+    if (hat){ b.px(hx-2, hy0+1, P.k2); b.px(hx+2, hy0+1, P.k2); } }
   for (var x2 = 0; x2 < W; x2 += 2){ var sy = 97+Math.round(Math.sin(x2*0.05)*1); b.px(x2, sy, P.s6); } [0, 80, 160, 240, 320].forEach(function(px){ b.rect(px, 92, 2, 8, P.w1); });
   // Fahrbahn und Platz
   for (var y2 = 98; y2 < 144; y2++) for (var x3 = 0; x3 < W; x3++) b.px(x3, y2, M.tex.paving(x3, y2, R('s2 s3 s4 s5'), 13));

@@ -81,7 +81,8 @@ button:focus{ outline:none; } button:focus-visible{ outline:calc(var(--u)*1) sol
 /* ---------------- Sprechen ---------------- */
 #speech .sp{ position:absolute; left:calc(var(--u)*4); right:calc(var(--u)*4); top:calc(var(--u)*4); display:flex; align-items:flex-start; gap:calc(var(--u)*5); }
 #speech .sp.r{ flex-direction:row-reverse; }
-#speech .pt{ width:calc(var(--u)*56); height:calc(var(--u)*64); image-rendering:pixelated; flex:none; }
+#speech .pt{ width:calc(var(--u)*56); height:calc(var(--u)*64); image-rendering:pixelated; flex:none; background:radial-gradient(ellipse at 50% 40%, #2a2536 0%, #13111c 70%); border:calc(var(--u)*1) solid var(--s6); box-sizing:content-box; }
+#speech .sp.r .pt{ border-color:var(--s4); }
 #speech .tb{ background:var(--k0); border:calc(var(--u)*1) solid var(--s6); padding:calc(var(--u)*3) calc(var(--u)*6) calc(var(--u)*4); max-width:calc(var(--u)*240); box-sizing:border-box; position:relative; }
 #speech .sp.r .tb{ border-color:var(--s4); }
 #speech .who{ font-size:.8em; color:var(--s3); margin-bottom:calc(var(--u)*1); }

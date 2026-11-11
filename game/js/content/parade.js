@@ -31,7 +31,7 @@ async function sign(A){ var H = A.npc('helfer');
 
 // ---------------------------------------------------------------- Finale
 var FORM = [ ['k1', 'kidA', 0, 0], ['k2', 'kidC', 0, 1], ['k3', 'kidB', 0, 2], ['k4', 'kidD', 0, 3], ['jasna', 'jasna', 1, 0], ['k5', 'kidA', 1, 1], ['k6', 'kidD', 1, 2], ['k7', 'kidC', 1, 3], ['k8', 'kidB', 2, 0], ['k9', 'kidC', 2, 1], ['nedim', 'nedim', 2, 2] ];
-MA.finale = async function(A){ var E = MA.E;
+MA.finale = async function(A){ var E = MA.E; E.cutscene = true;
   await A.fade(1, 500); await A.goto('parade', { fade: false, noEnter: true, x: K.cols[3], y: K.rows[2], f: 'F', noSave: true });
   var me = MA.ACT.m; if (me){ me.idle = 'npflagF'; me.f = 'F'; MA.setIdle(me); }
   A.cam(120); await A.fade(0, 500);
@@ -64,7 +64,7 @@ MA.finale = async function(A){ var E = MA.E;
   await A.wait(800); await A.fade(1, 900); A.cam(null);
   await A.card({ text: ['Auf Brankos Blatt war ich an diesem Nachmittag nicht da.', 'Mara hatte mich bezahlt. Dedo würde sich an mich erinnern. Dragan hatte seinen Ball.', 'Und der Lehrer musste meinen Namen nicht mehr nachsehen.'] });
   await MA.finishChapter(A); };
-function kidsIdle(an){ FORM.forEach(function(f){ var a = MA.ACT[f[0]]; if (a){ a.f = 'F'; a.idle = an; MA.setIdle(a); } }); }
+function kidsIdle(an){ MA.E.cheer = /Wave|shout/i.test(an); FORM.forEach(function(f){ var a = MA.ACT[f[0]]; if (a){ a.f = 'F'; a.idle = an; MA.setIdle(a); } }); }
 
 MA.defineRoom({ id: 'parade', name: 'Paradestraße', width: K.W,
   paint: MA.ART.parade.paint, layers: MA.ART.parade.layers,

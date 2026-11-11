@@ -15,7 +15,13 @@ Verbindlich für alle Grafiken von M. Adventure. Grundlage sind die untersuchten
 - Figuren und Porträts haben eine **dunkle Kontur** (`k1`, `M.outline`).
 
 ## Figurenmaßstab und Perspektive
-- Erwachsene ≈ **50 px**, Kinder ≈ **42 px** (Knochen 9/8/7/6, gestauchte Posen 0,82). Gleiche Größe überall im Raum (wie MALA, keine Tiefenskalierung).
+- Erwachsene ≈ **50 px**, Kinder ≈ **43 px** (Knochen 9/8/7/6, gestauchte Posen 0,82). Gleiche Größe überall im Raum (wie MALA, keine Tiefenskalierung).
+- **Detailgrad der Figuren (über MALA hinaus, `art/rig_detail.js`, `art/heads.js`):** gleiche Posen und Maße wie im MALA-Rig, aber
+  - Köpfe 1–2 px größer, mit Augenbrauen, Augenweiß, Ohr, Nasenschatten, Mund, Haarsträhnen und Glanz,
+  - Glieder verjüngt und vierstufig schattiert, Innenkontur zwischen Arm und Körper,
+  - Ärmel lang/kurz/hochgekrempelt, Hände mit Fingern, kurze Hosen als Hosenbeine, Socken, Schuhe mit Sohle, Sandalen, Stiefel,
+  - Gürtel mit Schnalle, Knopfleiste, Brusttasche, Halstuch mit Knoten und schwingenden Zipfeln, Armbinde am Oberarm, schwingende Zöpfe.
+- **Statisten** (Passanten, Zuschauer) nutzen dasselbe Rig; Zuschauer in der hinteren Reihe verkleinert (0,62) und farblich umgesetzt.
 - Räume frontal mit Fluchtpunkt; Lauffläche als Band im unteren Drittel (y ≈ 100–140).
 - Vordergrundobjekte (Tische, Stände, Bank, Schlagbaum, Brüstung) als Ebenen mit Grundlinie → richtiges Verdecken.
 
@@ -43,10 +49,26 @@ Verbindlich für alle Grafiken von M. Adventure. Grundlage sind die untersuchten
 - **Menüs:** Kästen `k1` mit Ockerrahmen `y2`, Text `s5`, Auswahl `y4/y5`.
 - **Karte:** handgezeichneter Stadtplan in Papiertönen; nur bekannte Orte; hier = gelb, gesperrt = grau mit Grund.
 
+## Bewegung und Eigenleben
+- **Gehen:** 8 Bilder je Richtung, Arme schwingen gegenläufig zu den Beinen, leichte Vorlage, Kopfnicken; Richtungswechsel über ein Bild der Vorderansicht.
+- **Stehen:** nie ganz still – Atmen (Oberkörper 1 px), Gewichtsverlagerung, Lidschlag.
+- **Sprechen:** wechselnde Gesten mit beiden Händen; der Mund im Porträt geht im Takt des Textes.
+- **Gewohnheiten** (`engine/life.js`): jede Figur hat eigene Einlagen in zufälligen Abständen:
+  - Branko schreibt, der Lehrer hält dabei den Mantel zu,
+  - Mara ordnet Flaschen, Dedo poliert, Jovan geht auf und ab und sieht auf die Uhr,
+  - Dragan prellt den Ball erst, wenn er ihn zurückhat,
+  - die Kinder hüpfen, lachen und reden lautlos miteinander.
+- **Aufmerksamkeit:** Figuren drehen sich zu M., wenn er vorbeigeht. Wer M. stehen lässt, sieht ihn sich umsehen, kratzen, wippen, gähnen.
+- **Umgebung** (`engine/extras.js`):
+  - Tauben fliegen auf, die Katze flieht vor M., Passanten gehen durchs Bild,
+  - die Zuschauer winken und jubeln, wenn die Klasse jubelt,
+  - Fahnen wehen, Wimpelketten und Wäsche schwingen, im Laub glitzert es.
+- **Vorrang:** Skripte und Gespräche haben immer Vorrang. Figuren, die eine Szene bewegt, und der Gesprächspartner werden nicht gestört; große Szenen (Einstieg, Probe, Werbung, Finale) frieren das Eigenleben ein.
+
 ## Erforderliche Animationszustände
 | Figur | Zustände |
 |---|---|
-| alle | stehen (Seite/vorn/hinten, Lidschlag), gehen (8 Bilder je Richtung), sprechen |
+| alle | stehen (Seite/vorn/hinten, atmen, Gewicht verlagern, Lidschlag), gehen (8 Bilder je Richtung, Armschwung), sprechen (Gesten), Gewohnheiten (umsehen, kratzen, Hände hinter dem Rücken/in die Hüften, strecken, gähnen, wippen, kicken, nicken, lachen, zeigen, seufzen) |
 | M. | greifen (mittel/tief/hoch), aufheben, geben, schieben, ziehen, hocken, Kiste tragen, Fahne halten/winken |
 | Kinder | Fähnchen halten/winken, rufen |
 | Lehrer | Mantel zuhalten (stehen/sprechen) |

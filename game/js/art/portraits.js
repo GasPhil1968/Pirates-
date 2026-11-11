@@ -21,6 +21,8 @@ function smooth(t){ t = Math.max(0, Math.min(1, t)); return t*t*(3-2*t); }
 function paint(d, variant){ var b = new Buf(PW, PH, T), o = d;
   var kid = !!o.kid, age = o.age || 0;
   var cx = o.cx || 27, cy = o.cy || (kid ? 25 : 24), rx = o.rx || (kid ? 12.5 : 13), ry = o.ry || (kid ? 14.5 : 15.5), jaw = o.jaw === undefined ? 0.74 : o.jaw, turn = o.turn === undefined ? 2 : o.turn;
+  // M.ADV Detail: Köpfe gut ein Zehntel größer, damit Augen, Brauen und Mund mehr Pixel bekommen
+  var HS2 = o.hs || 1.1; rx *= HS2; ry *= HS2; cy += 1.5;
   var skin = o.skin || SKIN.warm, hair = o.hairCol || HAIR.brown;
   // ---- Körper: Halsansatz, Schulterschräge, Arme
   var nb = Math.round(cy+ry*0.82), sw = o.shoulder || (kid ? 21 : 25), neckH = kid ? 4.5 : 5.5, cloth = o.cloth || R('m0 m1 m2 m3 m4');
@@ -58,20 +60,22 @@ function paint(d, variant){ var b = new Buf(PW, PH, T), o = d;
   var mY = nY+nl+(o.mouthGap || Math.max(2, Math.round(ry*0.16))), mw = o.mouthW || (kid ? 5 : 6), mx0 = Math.round(fcx-mw/2), lip = o.lipCol || skin[1];
   if (variant === 'o'){ b.hl(mx0, mx0+mw-1, mY, P.k1); b.hl(mx0+1, mx0+mw-2, mY+1, P.r1); b.px(mx0+1, mY+1, P.k1); b.px(mx0+mw-2, mY+1, P.k1); b.hl(mx0+1, mx0+mw-2, mY+2, lip); }
   else { var mood = o.mouth || 'neutral';
-    b.hl(mx0, mx0+mw-1, mY, lip); if (mood === 'smile'){ b.px(mx0-1, mY-1, lip); b.px(mx0+mw, mY-1, lip); } if (mood === 'frown'){ b.px(mx0-1, mY+1, lip); b.px(mx0+mw, mY+1, lip); } if (mood === 'tight'){ b.px(mx0+mw, mY, skin[2]); }
-    b.hl(mx0+1, mx0+mw-2, mY+1, skin[4]); }
+    b.hl(mx0, mx0+mw-1, mY, M.DN[lip]); b.hl(mx0+1, mx0+mw-2, mY+1, M.UP[lip] !== undefined ? lip : lip); if (mood === 'smile'){ b.px(mx0-1, mY-1, M.DN[lip]); b.px(mx0+mw, mY-1, M.DN[lip]); } if (mood === 'frown'){ b.px(mx0-1, mY+1, lip); b.px(mx0+mw, mY+1, lip); } if (mood === 'tight'){ b.px(mx0+mw, mY, skin[2]); }
+    b.hl(mx0+1, mx0+mw-2, mY+2, skin[3]); }
   b.px(fcx, mY+3, skin[2]);   // Kinngrübchen/Schatten unter der Lippe
   // Alter
   if (age >= 1){ b.px(fcx-4, nY+nl+1, skin[2]); b.px(fcx+4, nY+nl+1, skin[2]); b.px(fcx-5, nY+nl+2, skin[2]); b.px(eR+3, eyY+1, skin[2]); }
   if (age >= 2){ b.hl(fcx-4, fcx+3, eyY-7, skin[2]); b.hl(fcx-3, fcx+2, eyY-9, skin[2]); b.px(eL-3, eyY+1, skin[2]); b.px(eL-3, eyY+2, skin[2]); b.px(fcx-6, mY, skin[2]); b.px(fcx+6, mY, skin[2]); }
   // ---- Augen: Lidstrich, Weiß, Iris mit Glanz, Pupille
   var iris = o.iris || P.h2, wh = o.eyeWhite || P.s5;
-  [[eL, 4], [eR, 3]].forEach(function(e, i){ var ex = e[0], w = e[1], x0 = ex-1;
-    if (variant === 'b'){ b.hl(x0, x0+w-1, eyY, skin[1]); b.hl(x0, x0+w-1, eyY-1, skin[2]); return; }
-    b.hl(x0, x0+w-1, eyY-1, P.k1); for (var j = 0; j < w; j++) b.px(x0+j, eyY, wh);
-    var ix = x0+(i ? 1 : 2); b.px(ix, eyY, iris); b.px(ix-1, eyY, (w === 4) ? iris : wh); b.px(ix, eyY, P.k0); b.px(ix-1, eyY, iris);
-    b.px(x0+w-1, eyY+1, skin[2]); if (kid) b.hl(x0, x0+w-1, eyY+1, skin[3]);
-    if (o.lashes){ b.px(x0-1, eyY-1, P.k1); b.px(x0+w, eyY-2, P.k1); } });
+  // Augen zwei Pixel hoch: Oberlid, Weiß, Iris 2×2 mit Pupille und Glanzlicht, Unterlid-Schatten
+  [[eL, 4], [eR, 4]].forEach(function(e, i){ var ex = e[0], w = e[1], x0 = ex-1;
+    if (variant === 'b'){ b.hl(x0, x0+w-1, eyY-1, skin[2]); b.hl(x0-(i ? 0 : 1), x0+w-1+(i ? 1 : 0), eyY, P.k1); b.hl(x0, x0+w-1, eyY+1, skin[2]); return; }
+    b.hl(x0-(i ? 0 : 1), x0+w-1+(i ? 1 : 0), eyY-1, P.k1);
+    for (var j = 0; j < w; j++){ b.px(x0+j, eyY, wh); b.px(x0+j, eyY+1, (j === 0 || j === w-1) ? skin[2] : M.DN[wh]); }
+    var ix = x0+(i ? 1 : 2); b.px(ix, eyY, P.k0); b.px(ix-1, eyY, iris); b.px(ix-1, eyY+1, iris); b.px(ix, eyY+1, M.DN[iris]); b.px(ix-1, eyY, M.UP[M.UP[iris]] || P.s6);
+    b.hl(x0, x0+w-1, eyY+2, kid ? skin[3] : skin[2]);
+    if (o.lashes){ b.px(x0-1, eyY-2, P.k1); b.px(x0+w, eyY-2, P.k1); b.px(x0+w-1, eyY-2, P.k1); } });
   // Brauen
   var br = o.brow || 'flat', bc = o.browCol || hair[1], byy = eyY-3+(o.browY || 0);
   [[eL-2, 5], [eR-1, 4]].forEach(function(e, i){ for (var j = 0; j < e[1]; j++){ var yy = byy; if (br === 'up' && j === (i ? e[1]-1 : 0)) yy--; if (br === 'worried'){ if (i === 0 && j >= e[1]-2) yy--; if (i === 1 && j <= 1) yy--; } if (br === 'down' && j === (i ? 0 : e[1]-1)) yy++; if (br === 'stern'){ if (i === 0 && j >= e[1]-2) yy++; if (i === 1 && j <= 1) yy++; } b.px(e[0]+j, yy, bc); } });

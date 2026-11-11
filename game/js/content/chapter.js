@@ -20,7 +20,7 @@ MA.onRoomChange = function(id){ MA.set('seen.'+id); if (id === 'markt') MA.set('
 MA.JOURNEY = [ { t: 'Podaca 2018' }, { t: 'Rosko Polje 1953' }, { t: 'Mostar 1955', done: true, now: true }, { t: 'Marine' }, { t: 'Sarajevo 1970er' }, { t: 'Deutschland' }, { t: 'Podaca' } ];
 
 // ---------------------------------------------------------------- Einstieg
-MA.startChapter = function(A){ var E = MA.E;
+MA.startChapter = function(A){ var E = MA.E; E.cutscene = true;
   MA.GS.pos = { x: 176, y: 132, f: 'L' }; MA.loadRoom('hof'); E.screen = 'game'; MA.UI.refreshBar();
   MA.GS.inv = ['heft', 'bleistift'];
   document.getElementById('fade').style.opacity = '1';

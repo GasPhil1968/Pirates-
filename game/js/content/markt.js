@@ -130,7 +130,7 @@ async function s20(A){ var De = A.npc('dedo'); await A.say('Ich kann dir bessere
   A.set('dedo.deal'); A.note('n_pfeife'); }
 
 // ---------------------------------------------------------------- S21: Die Kinder werben, der Lehrer kauft
-MA.adScene = async function(A){
+MA.adScene = async function(A){ MA.E.cutscene = true;
   await A.fade(1, 320); await A.goto('markt', { fade: false, noEnter: true, x: 300, y: 126, f: 'L', noSave: true });
   var J = A.spawn({ id: 'jasna', ch: 'jasna', x: 330, y: 124, f: 'L', hgt: 42 }), N = A.spawn({ id: 'nedim', ch: 'nedim', x: 346, y: 128, f: 'L', hgt: 40 });
   A.spawn({ id: 'kidA', ch: 'kidA', x: 362, y: 124, f: 'L', hgt: 42 }); A.spawn({ id: 'kidB', ch: 'kidB', x: 376, y: 129, f: 'L', hgt: 42 });

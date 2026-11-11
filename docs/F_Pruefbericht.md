@@ -64,6 +64,30 @@ Zeitliche Einordnung: Die Durchläufe A (Desktop, iPhone) und B liefen auf dem E
 - **Desktop und mobil:** Layoutprüfung auf acht Profilen und vollständiger Touch-Durchlauf.
 - **Browserfehler, fehlende Dateien, blockierte Dialoge:** In allen Läufen wurden `pageerror`, `console.error` und fehlgeschlagene Anfragen mitgeschrieben. Blockierte Dialoge wurden gefunden und behoben (Abschnitt 3).
 
+## 2a. Überarbeitung von Grafik und Bewegung (zweite Runde)
+
+Auf Rückmeldung („zu wenig Details, Hauptfigur zu steif, Figuren ohne Eigenleben“) neu hinzugekommen:
+
+**Figuren:**
+- Neuer Detail-Zeichner für das MALA-Rig. Die MALA-Datei selbst bleibt unverändert.
+- Neu gezeichnete Köpfe aller 16 Figuren.
+- Ärmel, Hände, kurze Hosen, Socken, Schuhe und Sandalen, Gürtel, Halstuchknoten, Armbinden, Zöpfe.
+- Porträts mit größeren Köpfen und zwei Pixel hohen Augen.
+
+**Bewegung:**
+- Gehzyklus mit Armschwung, Atmen und Gewichtsverlagerung im Stand.
+- Wechselnde Sprechgesten, Drehung über die Vorderansicht.
+
+**Eigenleben:**
+- Gewohnheiten je Figur, Blick zu M., kleine Wege, Gespräche der Kinder, Ungeduld von M.
+
+**Umgebung:**
+- Tauben, Katze, Passanten, eine belebte Zuschauermenge.
+- Wehende Fahnen, schwingende Wimpel und Wäsche, Laubschimmer.
+- Zusatzdetails am Schulhof, auf dem Markt und an der Paradestraße.
+
+Danach liefen alle Prüfungen aus Abschnitt 1 erneut. Die Ergebnisse dort gelten für diesen Stand.
+
 ## 3. Gefundene und behobene Fehler
 
 | Befund | Behebung |
@@ -85,6 +109,12 @@ Zeitliche Einordnung: Die Durchläufe A (Desktop, iPhone) und B liefen auf dem E
 | Klassenzimmer: M. erschien beim Eintreten genau auf dem Lehrer | Eintrittspunkt an die Tür verlegt |
 | Touch: Ein Tipp knapp über der Leiste (noch in der Szene) öffnete die Notizen – der Browser verschiebt Fingertipps zum nächsten anklickbaren Element, und die Szene galt nicht als anklickbar | Szene als Klickziel angemeldet; etwas mehr Abstand zur oberen Knopfreihe auf kleinen Telefonen |
 | Grafik: schwarze Flecken in Texturen, Putz wie Ziegel, Plakatkleber hinter dem Plakat, Laufwege im Klassenzimmer | Rampen, Putz-Textur, Tiefensortierung und Laufpolygon korrigiert |
+| Zweite Runde: Die kurzen Hosen der Jungen wurden als Rock gezeichnet | echte Hosenbeine im Detail-Zeichner |
+| Zweite Runde: Armbinden saßen wie Schulterklappen auf beiden Armen | ein Band am Oberarm |
+| Zweite Runde: Tikos weiße Mütze wurde beim Lidschlag braun; der Bleistift des Helfers lag auf der Wange | eigener Buchstabe für die Mütze; Bleistift hinter das Ohr |
+| Zweite Runde: Die Fahne über der Schultür wirkte beim Wehen doppelt | ruhigere Welle |
+| Zweite Runde: Die Zuschauer an der Paradestraße waren ein Farbrauschen | einzelne, belebte Figuren mit eigener Kleidung |
+| Zweite Runde: Beim Benutzen der Listenmappe stand M. im Lehrer | Lehrer ans Pultende versetzt |
 
 Nach jeder Korrektur wurden die betroffenen Abläufe erneut durchlaufen. Die Ergebnisse in Abschnitt 1 beziehen sich auf die letzte Fassung.
 
@@ -96,7 +126,9 @@ Nach jeder Korrektur wurden die betroffenen Abläufe erneut durchlaufen. Die Erg
 - **Ton:** keiner, wie im Konzept für die Browserfassung vorgesehen.
 - **Grafik:**
   - Hintergründe, Figuren und Symbole sind mit der MALA-Technik in der MALA-Palette gezeichnet: Code-Malerei mit festen Figuren-Sprites aus dem Rig, keine Platzhalter.
-  - Die Porträts entstehen aus Parametern und erreichen nicht die handgepixelte Qualität der MALA-Porträts.
+  - Die Köpfe der Figuren sind handgepixelt und detaillierter als in MALA.
+  - Die Porträts entstehen weiter aus Parametern. Sie sind verbessert, erreichen aber nicht die Qualität handgepixelter Porträts.
+  - Das Eigenleben läuft zufallsgesteuert. Es wurde in den Durchläufen beobachtet, aber nicht über längere Zeit mit Menschen bewertet.
   - Die im PDF erwähnten Grafikassets der Fassung „V168“ lagen nicht bei und wurden nicht verwendet.
 - **Nicht umgesetzt:**
   - weitere Kapitel (nur als Überblick in B),

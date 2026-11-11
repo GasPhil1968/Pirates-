@@ -6,7 +6,7 @@
 (function(M){
 'use strict';
 var P = M.P, A = M.ANIMS, HS = M.headSet;
-function L(o){ var l = { k: P.k1, e: P.k0, w: P.s6 }; for (var k in o) l[k] = o[k]; return l; }
+function L(o){ var l = { k: P.k1, e: P.k0, w: P.s6 }; for (var k in o) l[k] = o[k]; if (l.E === undefined) l.E = l.H !== undefined ? l.H : P.h1; if (l.u === undefined && l.S !== undefined) l.u = M.UP[l.S] !== undefined ? M.UP[l.S] : l.S; if (l.o === undefined) l.o = P.k0; return l; }
 
 // ---------------------------------------------------------------- Kinderposen: alle Posen der Bibliothek auf Kindermaß stauchen
 var KID = 0.82;
@@ -48,6 +48,15 @@ A.shoutFlag = [[F({ hd: 'o', rh: [9, -38], it: 'flag' }), 300], [F({ hd: 'o', rh
 A.sitBench = [[S({ h: [0, -13], nf: [9, 0, 'f'], ff: [7, 0, 'f'], nh: [6, -14], fh: [4, -14], sit: 1 }), 1400], [S({ h: [0, -13], nf: [9, 0, 'f'], ff: [7, 0, 'f'], nh: [6, -14], fh: [4, -14], sit: 1, hd: 'b' }), 110], [S({ h: [0, -13], nf: [8, 0, 'f'], ff: [7, 0, 'f'], nh: [6, -15], fh: [4, -14], sit: 1, ho: [0, 1] }), 1100]];
 ['wave', 'waveF', 'flagF', 'flagWaveF', 'npflagF', 'npflagWaveF', 'clipF', 'clipS', 'stamp', 'coatHold', 'coatHoldF', 'coatTalk', 'holdUp', 'brush', 'sell', 'armsCross', 'armsCrossS', 'lean', 'ballS', 'bounce', 'crouch', 'hold', 'pullLine', 'listen', 'shout', 'shoutFlag', 'sitBench'].forEach(function(n){ KIDANIM[n] = scaleAnim(A[n], KID); });
 M.CONTACT.stamp = 2; M.CONTACT.wave = 2;
+// Gewohnheiten mit gehaltenem Klemmbrett (Branko, vorn) und zugehaltenem Mantel (Lehrer)
+var CLF = { lh: [-3, -24], rh: [4, -24], it: 'clip' }, COH = { nh: [3, -31], fh: [1, -28] };
+function w(o, x){ var r = {}; for (var k in o) r[k] = o[k]; for (var k2 in x) r[k2] = x[k2]; return r; }
+A.clipWriteF = [[F(w(CLF, { ho: [0, 1] })), 300], [F(w(CLF, { ho: [0, 1], rh: [3, -23] })), 180], [F(w(CLF, { ho: [0, 1], rh: [5, -24] })), 180], [F(w(CLF, { ho: [0, 1], rh: [3, -23] })), 180], [F(w(CLF, { ho: [0, 1], rh: [5, -25], hd: 'b' })), 220], [F(CLF), 300]];
+A.clipLookF = [[F(w(CLF, { ho: [-1, 0] })), 700], [F(w(CLF, { ho: [-1, 0], hd: 'b' })), 100], [F(CLF), 300], [F(w(CLF, { ho: [1, 0] })), 700], [F(CLF), 300]];
+A.clipNodF = [[F(w(CLF, { ho: [0, 1] })), 200], [F(CLF), 180], [F(w(CLF, { ho: [0, 1] })), 200], [F(CLF), 300]];
+A.coatLookS = [[S(w(COH, { ho: [1, 0] })), 700], [S(w(COH, { ho: [1, -1] })), 600], [S(w(COH, { ho: [1, -1], hd: 'b' })), 100], [S(COH), 300], [S(w(COH, { ho: [-1, 0] })), 600], [S(COH), 200]];
+A.coatNodS = [[S(w(COH, { ho: [0, 1] })), 200], [S(COH), 180], [S(w(COH, { ho: [0, 1] })), 200], [S(COH), 300]];
+A.coatSighS = [[S(w(COH, { br: 1, ho: [0, -1] })), 500], [S(w(COH, { ho: [1, 1], hd: 'b' })), 700], [S(COH), 300]];
 
 // ---------------------------------------------------------------- Gehaltene Dinge (Seitenansicht über M.HELD; Vorderansicht über post)
 var H = M.HELD;
@@ -74,6 +83,10 @@ function stdPost(b, p, OX, OY, hx, hy){ if (p.v === 'S') return; var r = p.rh ||
 // ---------------------------------------------------------------- Kopf-Bausteine
 // Kind, Seitenansicht (nach rechts), 11 breit; Vorderansicht 10 breit; Rücken. Haarformen werden als ganze Stempel geschrieben.
 function kidHeads(o){ return { S: HS(o.S), F: HS(o.F), B: { n: o.B } }; }
+// Neue, detailliertere Köpfe aus art/heads.js haben Vorrang (M.HEADS[id] = {S, F, B, neck}); Lidschlag ersetzt auch das Augenweiß
+var HD = M.HEADS || {};
+function heads2(id, fallback){ var h = HD[id]; if (!h) return fallback; return { S: M.headSet2(h.S), F: M.headSet2(h.F), B: { n: h.B } }; }
+function neck2(id, fallback){ var h = HD[id]; return (h && h.neck) || fallback; }
 
 // ---------------- M. (13): dunkles, kurz geschnittenes Haar, hageres Gesicht, sauberes weißes Hemd, kurze Hose, Sandalen; ohne Halstuch und Mütze
 var mS = [
@@ -118,9 +131,9 @@ var mB = [
 "...ktsk..."];
 M.defineChar('m', { kid: true,
   legend: L({ H: P.h1, h: P.h2, j: P.h3, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0 }),
-  heads: kidHeads({ S: mS, F: mF, B: mB }), neck: { S: [5, 12], F: [5, 11], B: [5, 11] },
-  torso: { w: 10, len: 11, col: [P.s5, P.s6, P.s3], collar: [P.s6, P.s4], buttons: P.s3, side: 7 },
-  skirt: { c: [P.c1, P.c2, P.c0], hem: 6, flare: 0 },
+  heads: heads2('m', kidHeads({ S: mS, F: mF, B: mB })), neck: neck2('m', { S: [5, 12], F: [5, 11], B: [5, 11] }),
+  torso: { w: 10, len: 11, col: [P.s5, P.s6, P.s3], collar: [P.s6, P.s4], buttons: P.s3, belt: P.w2, buckle: P.y3, pocket: true, side: 7 },
+  dx: { sleeve: 'rolled', shorts: { col: [P.c1, P.c2, P.c0], len: 0.55 }, feet: 'sandal', strap: P.w1 },
   cols: { trou: [P.p3, P.p4, P.p2], trouF: [P.p2, P.p3, P.p1], sleeve: [P.s5, P.s6, P.s3], sleeveF: [P.s4, P.s5, P.s3], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.w2, shoeTop: P.w3 },
   bones: [9, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.4, 1.1], armR: [1.1, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost });
 
@@ -168,8 +181,9 @@ var jB = [
 var pionCap = { c: P.n1, C: P.n2, r: P.r3 };
 M.defineChar('jasna', { kid: true,
   legend: L(Object.assign({ H: P.h1, h: P.h2, j: P.r3, S: P.p5, s: P.p4, t: P.p3, m: P.p2, e: P.k0 }, pionCap)),
-  heads: kidHeads({ S: jS, F: jF, B: jB }), neck: { S: [5, 12], F: [5, 11], B: [5, 11] },
+  heads: heads2('jasna', kidHeads({ S: jS, F: jF, B: jB })), neck: neck2('jasna', { S: [5, 12], F: [5, 11], B: [5, 11] }),
   torso: { w: 10, len: 11, col: [P.s5, P.s6, P.s3], scarf: [P.r3, P.r4, P.r2], side: 7 },
+  dx: { sleeve: 'short', socks: { col: [P.s5, P.s6, P.s3], h: 3 }, feet: 'shoe', braids: { y: 7, len: 6, col: [P.h1, P.h2], ribbon: P.r3 } },
   skirt: { c: [P.n1, P.n2, P.n0], hem: 9, flare: 2 },
   cols: { trou: [P.p4, P.p5, P.p3], trouF: [P.p3, P.p4, P.p2], sleeve: [P.s5, P.s6, P.s3], sleeveF: [P.s4, P.s5, P.s3], hand: [P.p5, P.p4], handF: [P.p4, P.p3], shoe: P.k2 },
   bones: [9, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.3, 1.1], armR: [1.0, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost });
@@ -217,9 +231,9 @@ var nB = [
 "...ktsk..."];
 M.defineChar('nedim', { kid: true,
   legend: L(Object.assign({ H: P.w1, h: P.w2, j: P.w3, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0 }, pionCap)),
-  heads: kidHeads({ S: nS, F: nF, B: nB }), neck: { S: [5, 12], F: [5, 11], B: [5, 11] },
-  torso: { w: 10, len: 10, col: [P.s5, P.s6, P.s3], scarf: [P.r3, P.r4, P.r2], side: 7 },
-  skirt: { c: [P.e1, P.e2, P.e0], hem: 6, flare: 0 },
+  heads: heads2('nedim', kidHeads({ S: nS, F: nF, B: nB })), neck: neck2('nedim', { S: [5, 12], F: [5, 11], B: [5, 11] }),
+  torso: { w: 10, len: 10, col: [P.s5, P.s6, P.s3], scarf: [P.r3, P.r4, P.r2], belt: P.e0, side: 7 },
+  dx: { sleeve: 'long', shorts: { col: [P.e1, P.e2, P.e0], len: 0.62 }, socks: { col: [P.s4, P.s5, P.s3], h: 2 }, feet: 'shoe' },
   cols: { trou: [P.p3, P.p4, P.p2], trouF: [P.p2, P.p3, P.p1], sleeve: [P.s5, P.s6, P.s3], sleeveF: [P.s4, P.s5, P.s3], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.w1 },
   bones: [8, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.3, 1.1], armR: [1.0, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost });
 
@@ -266,19 +280,21 @@ var dB = [
 "...ktsk..."];
 M.defineChar('dragan', { kid: true,
   legend: L({ H: P.w3, h: P.w4, j: P.w5, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0 }),
-  heads: kidHeads({ S: dS, F: dF, B: dB }), neck: { S: [5, 12], F: [5, 11], B: [5, 11] },
+  heads: heads2('dragan', kidHeads({ S: dS, F: dF, B: dB })), neck: neck2('dragan', { S: [5, 12], F: [5, 11], B: [5, 11] }),
   torso: { w: 10, len: 11, col: [P.s4, P.s5, P.s3], collar: [P.s5, P.s3], side: 7, taper: true },
-  skirt: { c: [P.e1, P.e2, P.e0], hem: 6, flare: 1 },
+  dx: { sleeve: 'rolled', shorts: { col: [P.e1, P.e2, P.e0], len: 0.5 }, feet: 'shoe' },
   cols: { trou: [P.p3, P.p4, P.p2], trouF: [P.p2, P.p3, P.p1], sleeve: [P.s4, P.s5, P.s3], sleeveF: [P.s3, P.s4, P.s2], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.w1 },
   bones: [9, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.4, 1.1], armR: [1.1, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost });
 
 // ---------------- weitere Kinder der Klasse (Aufstellung, Schulhof): vier Varianten aus denselben Bausteinen
 function kidVariant(id, hair, skin, shirt, bottom, opt){ opt = opt || {};
   var legend = L(Object.assign({ H: hair[0], h: hair[1], j: hair[2], S: skin[0], s: skin[1], t: skin[2], m: skin[3], e: P.k0 }, pionCap));
-  var heads = opt.girl ? kidHeads({ S: jS, F: jF, B: jB }) : kidHeads({ S: nS, F: nF, B: nB });
-  M.defineChar(id, { kid: true, legend: legend, heads: heads, neck: { S: [5, 12], F: [5, 11], B: [5, 11] },
-    torso: { w: 10, len: opt.short ? 10 : 11, col: shirt, scarf: [P.r3, P.r4, P.r2], side: 7 },
-    skirt: { c: bottom, hem: opt.girl ? 9 : 6, flare: opt.girl ? 2 : 0 },
+  var hid = opt.girl ? 'kidGirl' : 'kidBoy', heads = heads2(hid, opt.girl ? kidHeads({ S: jS, F: jF, B: jB }) : kidHeads({ S: nS, F: nF, B: nB }));
+  M.defineChar(id, { kid: true, legend: legend, heads: heads, neck: neck2(hid, { S: [5, 12], F: [5, 11], B: [5, 11] }),
+    torso: { w: 10, len: opt.short ? 10 : 11, col: shirt, scarf: [P.r3, P.r4, P.r2], belt: opt.girl ? undefined : bottom[2], side: 7 },
+    skirt: opt.girl ? { c: bottom, hem: 9, flare: 2 } : undefined,
+    dx: opt.girl ? { sleeve: 'short', socks: { col: [P.s5, P.s6, P.s3], h: 3 }, feet: 'shoe', braids: { y: 7, len: 5, col: [hair[0], hair[1]], ribbon: P.r3 } }
+                 : { sleeve: opt.short ? 'rolled' : 'long', shorts: { col: bottom, len: 0.55 }, socks: opt.short ? null : { col: [P.s4, P.s5, P.s3], h: 2 }, feet: 'shoe' },
     cols: { trou: [skin[1], skin[0], skin[2]], trouF: [skin[2], skin[1], skin[3]], sleeve: shirt, sleeveF: [shirt[2], shirt[0], shirt[2]], hand: [skin[0], skin[1]], handF: [skin[1], skin[2]], shoe: opt.girl ? P.k2 : P.w1 },
     bones: [9, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.3, 1.1], armR: [1.0, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost }); }
 var SK1 = [P.p4, P.p3, P.p2, P.p1], SK2 = [P.p5, P.p4, P.p3, P.p2], SK3 = [P.q4, P.q3, P.q2, P.q1];
@@ -336,9 +352,10 @@ var leB = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('lehrer', {
-  legend: L({ H: P.e1, h: P.e2, j: P.e3, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.e1, g: P.m1, e: P.k0 }),
-  heads: { S: HS(leS), F: HS(leF), B: { n: leB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.e2, P.e3, P.e1], collar: [P.s5, P.s4], lapel: P.e3, buttons: P.e0, side: 8 },
+  legend: L({ H: P.m2, h: P.m3, j: P.m4, E: P.m2, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.m2, g: P.m1, u: P.q4, e: P.k0 }),
+  heads: heads2('lehrer', { S: HS(leS), F: HS(leF), B: { n: leB } }), neck: neck2('lehrer', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.e2, P.e3, P.e1], collar: [P.s5, P.s4], lapel: P.e3, buttons: P.e0, tie: P.r1, pocket: true, side: 8 },
+  dx: { sleeve: 'long', feet: 'shoe' },
   coat: { c: [P.e2, P.e3, P.e1], hem: 10, w: 6 },
   cols: { trou: [P.m1, P.m2, P.m0], trouF: [P.m0, P.m1, P.k2], sleeve: [P.e2, P.e3, P.e1], sleeveF: [P.e1, P.e2, P.e0], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.w0 },
   post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); if (p.v === 'F'){ b.px(OX+hx+2, OY+hy-9, P.e1); } } });
@@ -391,12 +408,11 @@ var brB = [
 "...kssk...."];
 M.defineChar('branko', {
   legend: L({ H: P.h0, h: P.h2, j: P.h3, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0 }),
-  heads: { S: HS(brS), F: HS(brF), B: { n: brB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.s5, P.s6, P.s3], collar: [P.s6, P.s4], buttons: P.s3, belt: P.k2, side: 8 },
+  heads: heads2('branko', { S: HS(brS), F: HS(brF), B: { n: brB } }), neck: neck2('branko', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.s5, P.s6, P.s3], collar: [P.s6, P.s4], buttons: P.s3, belt: P.k2, buckle: P.m3, pocket: true, side: 8 },
+  dx: { sleeve: 'rolled', armband: { col: [P.r3, P.r4, P.r2] }, feet: 'shoe' },
   cols: { trou: [P.k2, P.c0, P.k1], trouF: [P.k1, P.k2, P.k0], sleeve: [P.s5, P.s6, P.s3], sleeveF: [P.s4, P.s5, P.s3], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.k2 },
-  post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); var L2 = 13;
-    if (p.v === 'S'){ var ax = OX+hx+1+Math.round((p.ln || 0)*(L2-2)/(L2-1)), ay = OY+hy-L2+6; b.rect(ax-1, ay, 3, 2, P.r3); }
-    else if (p.v === 'F'){ var lx = OX+hx-6, ly = OY+hy-L2+6; b.rect(lx-1, ly, 2, 2, P.r3); } } });
+  post: stdPost });
 
 // ---------------- Mara (um 40): Kopftuch, kräftige Arme, hochgekrempelte Ärmel, blaue Schürze über dunklem Rock
 var maS = [
@@ -445,9 +461,10 @@ var maB = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('mara', {
-  legend: L({ c: P.r2, C: P.r3, S: P.q3, s: P.q2, t: P.q1, m: P.r1, e: P.k0, H: P.h1 }),
-  heads: { S: HS(maS), F: HS(maF), B: { n: maB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
+  legend: L({ c: P.r2, C: P.r3, r: P.r1, S: P.q3, s: P.q2, t: P.q1, m: P.r2, e: P.k0, H: P.h1, h: P.h2, E: P.h1, y: P.y3 }),
+  heads: heads2('mara', { S: HS(maS), F: HS(maF), B: { n: maB } }), neck: neck2('mara', { S: [6, 13], F: [5, 13], B: [5, 13] }),
   torso: { w: 12, len: 12, col: [P.w3, P.w4, P.w2], apron: [P.b1, P.b2], side: 8, belly: true },
+  dx: { sleeve: 'rolled', feet: 'shoe', cuff: [P.w4, P.w5, P.w3] },
   skirt: { c: [P.k2, P.m0, P.k1], hem: 15, flare: 2 },
   cols: { trou: [P.q2, P.q3, P.q1], trouF: [P.q1, P.q2, P.q0], sleeve: [P.w3, P.w4, P.w2], sleeveF: [P.w2, P.w3, P.w1], arm: [P.q3, P.q4, P.q2], armF: [P.q2, P.q3, P.q1], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.k2 },
   bones: [11, 10, 8, 7], armR: [1.5, 1.3], post: stdPost });
@@ -499,9 +516,10 @@ var deB = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('dedo', {
-  legend: L({ r: P.r3, H: P.m3, h: P.m4, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.m4, e: P.k0 }),
-  heads: { S: HS(deS), F: HS(deF), B: { n: deB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.k2, P.m0, P.k1], open: P.s5, buttons: P.y2, side: 8, belly: true },
+  legend: L({ r: P.r3, R: P.r4, o: P.k0, H: P.m3, h: P.m4, E: P.m4, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.s5, e: P.k0 }),
+  heads: heads2('dedo', { S: HS(deS), F: HS(deF), B: { n: deB } }), neck: neck2('dedo', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.k2, P.m0, P.k1], open: P.s5, buttons: P.y2, belt: P.r2, wideBelt: true, side: 8, belly: true },
+  dx: { sleeve: 'long', feet: 'shoe' },
   cols: { trou: [P.e1, P.e2, P.e0], trouF: [P.e0, P.e1, P.k2], sleeve: [P.s5, P.s6, P.s3], sleeveF: [P.s4, P.s5, P.s3], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.k2 },
   bones: [10, 10, 8, 7],
   post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); if (p.v === 'S'){ var x = OX+hx+3, y = OY+hy-13-12; b.px(x-6, y, P.k1); b.px(x-7, y+1, P.k1); b.px(x-7, y+2, P.k0); } } });
@@ -553,13 +571,14 @@ var joB = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('jovan', {
-  legend: L({ c: P.c1, C: P.c2, r: P.r3, H: P.h1, h: P.h2, S: P.p3, s: P.p2, t: P.p1, m: P.p0, e: P.k0 }),
-  heads: { S: HS(joS), F: HS(joF), B: { n: joB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.c2, P.c3, P.c1], collar: [P.c3, P.c1], buttons: P.y3, belt: P.k1, side: 8 },
+  legend: L({ c: P.c1, C: P.c2, r: P.r3, H: P.h1, h: P.h2, b: P.h2, S: P.p3, s: P.p2, t: P.p1, m: P.p0, e: P.k0 }),
+  heads: heads2('jovan', { S: HS(joS), F: HS(joF), B: { n: joB } }), neck: neck2('jovan', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.c2, P.c3, P.c1], collar: [P.c3, P.c1], buttons: P.y3, belt: P.w1, buckle: P.y3, pocket: true, side: 8 },
+  dx: { sleeve: 'long', armband: { col: [P.s5, P.s6, P.s3] }, feet: 'boot' },
   cols: { trou: [P.c1, P.c2, P.c0], trouF: [P.c0, P.c1, P.k2], sleeve: [P.c2, P.c3, P.c1], sleeveF: [P.c1, P.c2, P.c0], hand: [P.p3, P.p2], handF: [P.p2, P.p1], shoe: P.k1 },
   post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); var L2 = 13;
-    if (p.v === 'S'){ var ax = OX+hx+1+Math.round((p.ln || 0)*(L2-2)/(L2-1)), ay = OY+hy-L2+6; b.rect(ax-1, ay, 3, 2, P.s6); b.px(ax+3, ay-2, P.m4); b.px(ax+3, ay-1, P.m3); }
-    else if (p.v === 'F'){ var lx = OX+hx-6, ly = OY+hy-L2+6; b.rect(lx-1, ly, 2, 2, P.s6); b.vl(OX+hx+2, OY+hy-L2+2, OY+hy-L2+5, P.m3); b.px(OX+hx+2, OY+hy-L2+6, P.m4); } } });
+    if (p.v === 'S'){ var ax = OX+hx+2+Math.round((p.ln || 0)*(L2-2)/(L2-1)), ay = OY+hy-L2+4; b.px(ax+2, ay, P.m3); b.px(ax+2, ay+1, P.m3); b.px(ax+2, ay+2, P.m4); }
+    else if (p.v === 'F'){ b.vl(OX+hx+2, OY+hy-L2+2, OY+hy-L2+5, P.m3); b.px(OX+hx+2, OY+hy-L2+6, P.m4); } } });
 
 // ---------------- Der Plakatkleber (um 40): Schiebermütze, Arbeitsjacke voller Kleisterflecken, Pinsel
 var klS = [
@@ -608,9 +627,10 @@ var klB = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('kleber', {
-  legend: L({ c: P.e1, C: P.e2, H: P.h1, h: P.h2, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.h2, e: P.k0 }),
-  heads: { S: HS(klS), F: HS(klF), B: { n: klB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.b0, P.b1, P.n2], buttons: P.k2, side: 8, stripe: undefined },
+  legend: L({ c: P.e1, C: P.e2, H: P.h1, h: P.h2, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.q2, e: P.k0, x: P.s5 }),
+  heads: heads2('kleber', { S: HS(klS), F: HS(klF), B: { n: klB } }), neck: neck2('kleber', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.b0, P.b1, P.n2], buttons: P.k2, pocket: true, side: 8, stripe: undefined },
+  dx: { sleeve: 'rolled', feet: 'shoe', cuff: [P.b1, P.b2, P.b0] },
   cols: { trou: [P.b0, P.b1, P.n2], trouF: [P.n2, P.b0, P.n1], sleeve: [P.b0, P.b1, P.n2], sleeveF: [P.n2, P.b0, P.n1], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.w0 },
   post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); if (p.v === 'S'){ b.px(OX+hx+2, OY+hy-6, P.s5); b.px(OX+hx-1, OY+hy-10, P.s5); } else if (p.v === 'F'){ b.px(OX+hx-3, OY+hy-5, P.s5); b.px(OX+hx+2, OY+hy-9, P.s5); } } });
 
@@ -647,10 +667,11 @@ var heF = [
 "...kssk...."];
 M.defineChar('helfer', {
   legend: L({ H: P.w1, h: P.w2, j: P.w3, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0, y: P.y3 }),
-  heads: { S: HS(heS), F: HS(heF), B: { n: brB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.b4, P.b5, P.b3], collar: [P.b5, P.b3], side: 8 },
+  heads: heads2('helfer', { S: HS(heS), F: HS(heF), B: { n: brB } }), neck: neck2('helfer', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.b4, P.b5, P.b3], collar: [P.b5, P.b3], belt: P.w1, buckle: P.m3, side: 8 },
+  dx: { sleeve: 'rolled', armband: { col: [P.r3, P.r4, P.r2] }, feet: 'shoe' },
   cols: { trou: [P.e1, P.e2, P.e0], trouF: [P.e0, P.e1, P.k2], sleeve: [P.b4, P.b5, P.b3], sleeveF: [P.b3, P.b4, P.b2], arm: [P.p4, P.p5, P.p3], armF: [P.p3, P.p4, P.p2], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.w0 },
-  post: function(b, p, OX, OY, hx, hy){ stdPost(b, p, OX, OY, hx, hy); var L2 = 13; if (p.v === 'S'){ var ax = OX+hx+1, ay = OY+hy-L2+6; b.rect(ax-1, ay, 3, 2, P.r3); } else if (p.v === 'F'){ b.rect(OX+hx-7, OY+hy-L2+6, 2, 2, P.r3); } } });
+  post: stdPost });
 
 // ---------------- Tiko: heller Uniformrock, Schirmmütze, ein kurzer Auftritt
 var tiS = [
@@ -684,9 +705,44 @@ var tiF = [
 "...ktttk...",
 "...kssk...."];
 M.defineChar('tiko', {
-  legend: L({ w: P.s6, y: P.y3, c: P.s6, C: P.s5, H: P.m2, h: P.m3, S: P.q3, s: P.q2, t: P.q1, m: P.q0, e: P.k0 }),
-  heads: { S: HS(tiS), F: HS(tiF), B: { n: joB } }, neck: { S: [6, 13], F: [5, 13], B: [5, 13] },
-  torso: { w: 12, len: 13, col: [P.s5, P.s6, P.s4], buttons: P.y3, belt: P.y2, collar: [P.s6, P.s4], side: 8 },
+  legend: L({ W: P.s6, y: P.y3, c: P.s6, C: P.s5, r: P.r3, H: P.m3, h: P.m4, E: P.m2, S: P.q3, s: P.q2, t: P.q1, m: P.q0, e: P.k0 }),
+  heads: heads2('tiko', { S: HS(tiS), F: HS(tiF), B: { n: joB } }), neck: neck2('tiko', { S: [6, 13], F: [5, 13], B: [5, 13] }),
+  torso: { w: 12, len: 13, col: [P.s5, P.s6, P.s4], buttons: P.y3, belt: P.y2, buckle: P.y4, collar: [P.s6, P.s4], pocket: true, side: 8 },
+  dx: { sleeve: 'long', feet: 'boot' },
   cols: { trou: [P.s5, P.s6, P.s4], trouF: [P.s4, P.s5, P.s3], sleeve: [P.s5, P.s6, P.s4], sleeveF: [P.s4, P.s5, P.s3], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.k1 },
   post: function(b, p, OX, OY, hx, hy){ if (p.v === 'S'){ b.px(OX+hx+3, OY+hy-9, P.r3); b.px(OX+hx+3, OY+hy-8, P.y3); } } });
+
+// ---------------------------------------------------------------- Passanten (Statisten, nicht anklickbar): Köpfe aus vorhandenen Vorlagen in eigenen Farben
+H.basket = function(b, x, y){ b.line(x, y, x-1, y+3, P.w2); b.line(x+1, y, x+4, y+3, P.w2); b.rect(x-2, y+3, 8, 4, P.w3); b.hl(x-2, x+5, y+3, P.w4); b.hl(x-1, x+4, y+5, P.w2); b.px(x, y+2, P.g4); b.px(x+1, y+2, P.g5); b.px(x+3, y+2, P.r3); };
+H.cane = function(b, x, y){ b.line(x+1, y+1, x+3, y+22, P.w1); b.px(x+1, y, P.w2); };
+function passHeads(id, tpl){ var h = HD[tpl]; return h ? { S: M.headSet2(h.S), F: M.headSet2(h.F), B: { n: h.B } } : null; }
+if (HD.mara) M.defineChar('passFrau', {
+  legend: L({ c: P.m0, C: P.m1, r: P.m0, S: P.q3, s: P.q2, t: P.q1, m: P.q1, e: P.k0, H: P.m2, h: P.m3, E: P.m2, y: P.q2 }),
+  heads: passHeads('passFrau', 'mara'), neck: HD.mara.neck,
+  torso: { w: 12, len: 12, col: [P.m1, P.m2, P.m0], buttons: P.m0, side: 8, belly: true },
+  skirt: { c: [P.k2, P.m0, P.k1], hem: 15, flare: 2 },
+  dx: { sleeve: 'long', feet: 'shoe', item: 'basket' },
+  cols: { trou: [P.q2, P.q3, P.q1], trouF: [P.q1, P.q2, P.q0], sleeve: [P.m1, P.m2, P.m0], sleeveF: [P.m0, P.m1, P.k2], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.k2 },
+  bones: [11, 10, 8, 7], post: stdPost });
+if (HD.kleber) M.defineChar('passMann', {
+  legend: L({ c: P.m1, C: P.m2, H: P.w1, h: P.w2, S: P.p3, s: P.p2, t: P.p1, m: P.p0, b: P.p3, e: P.k0, x: P.p3 }),
+  heads: passHeads('passMann', 'kleber'), neck: HD.kleber.neck,
+  torso: { w: 12, len: 13, col: [P.m2, P.m3, P.m1], collar: [P.s5, P.s4], lapel: P.m3, buttons: P.m0, pocket: true, side: 8 },
+  dx: { sleeve: 'long', feet: 'shoe' },
+  cols: { trou: [P.c1, P.c2, P.c0], trouF: [P.c0, P.c1, P.k2], sleeve: [P.m2, P.m3, P.m1], sleeveF: [P.m1, P.m2, P.m0], hand: [P.p3, P.p2], handF: [P.p2, P.p1], shoe: P.w0 },
+  post: stdPost });
+if (HD.kidBoy) M.defineChar('passKind', { kid: true,
+  legend: L({ c: P.w1, C: P.w2, r: P.w1, H: P.w1, h: P.w2, j: P.w3, S: P.p4, s: P.p3, t: P.p2, m: P.p1, e: P.k0 }),
+  heads: passHeads('passKind', 'kidBoy'), neck: HD.kidBoy.neck,
+  torso: { w: 10, len: 11, col: [P.b2, P.b3, P.b1], collar: [P.b3, P.b1], side: 7 },
+  dx: { sleeve: 'short', shorts: { col: [P.e1, P.e2, P.e0], len: 0.55 }, feet: 'sandal', strap: P.w1 },
+  cols: { trou: [P.p3, P.p4, P.p2], trouF: [P.p2, P.p3, P.p1], sleeve: [P.b2, P.b3, P.b1], sleeveF: [P.b1, P.b2, P.b0], hand: [P.p4, P.p3], handF: [P.p3, P.p2], shoe: P.w2 },
+  bones: [9, 8, 7, 6], hipY: 23, shoulder: 4, legR: [1.4, 1.1], armR: [1.1, 0.9], tHipS: 3, anims: KIDANIM, post: stdPost });
+if (HD.lehrer) M.defineChar('passOpa', {
+  legend: L({ H: P.s4, h: P.s5, j: P.s6, E: P.s5, S: P.q3, s: P.q2, t: P.q1, m: P.q0, b: P.s5, g: P.q2, u: P.q4, e: P.k0 }),
+  heads: passHeads('passOpa', 'lehrer'), neck: HD.lehrer.neck,
+  torso: { w: 12, len: 13, col: [P.e1, P.e2, P.e0], collar: [P.s4, P.s3], buttons: P.e0, side: 8, hunch: true },
+  dx: { sleeve: 'long', feet: 'shoe', item: 'cane' },
+  cols: { trou: [P.m1, P.m2, P.m0], trouF: [P.m0, P.m1, P.k2], sleeve: [P.e1, P.e2, P.e0], sleeveF: [P.e0, P.e1, P.k2], hand: [P.q3, P.q2], handF: [P.q2, P.q1], shoe: P.k2 },
+  post: stdPost });
 })(M);

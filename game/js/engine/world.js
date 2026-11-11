@@ -80,7 +80,7 @@ function updateActor(a, dt){
   if (a.mode === 'walk'){ a.ft += dt;
     while (a.ft >= a.speed && a.mode === 'walk'){ a.ft -= a.speed; var tg = a.path[0]; if (!tg){ arrive(a); break; }
       var dx = tg[0]-a.x, dy = tg[1]-a.y, side = Math.abs(dx) >= Math.abs(dy)*0.8, step = side ? a.step : a.step*0.6, d2 = Math.hypot(dx, dy);
-      a.f = side ? (dx < 0 ? 'L' : 'R') : (dy < 0 ? 'B' : 'F');
+      var nf = side ? (dx < 0 ? 'L' : 'R') : (dy < 0 ? 'B' : 'F'); if ((a.f === 'L' && nf === 'R') || (a.f === 'R' && nf === 'L')) a.turnUntil = E.gt+110; a.f = nf;
       if (d2 <= step){ a.x = tg[0]; a.y = tg[1]; a.path.shift(); if (!a.path.length){ arrive(a); break; } }
       else { a.x += dx*step/d2; a.y += dy*step/d2; }
       a.fi = (a.fi+1) % 8; } }
@@ -94,7 +94,7 @@ function updateActor(a, dt){
     if (a.anim !== set){ a.anim = set; a.fi = 0; a.ft = 0; }
     a.ft += dt; var guard = 0; while (a.anim && a.ft >= a.anim[a.fi][1] && guard++ < 40){ a.ft -= a.anim[a.fi][1]; a.fi = (a.fi+1) % a.anim.length; } } }
 function poseOf(a){ if (a.frozen) return a.frozen;
-  if (a.mode === 'walk'){ var nm = a.f === 'F' ? 'walkF' : (a.f === 'B' ? 'walkB' : 'walkS'); var w = animOf(a, nm); return w[a.fi % 8]; }
+  if (a.mode === 'walk'){ var nm = (a.f === 'F' || (a.turnUntil && E.gt < a.turnUntil)) ? 'walkF' : (a.f === 'B' ? 'walkB' : 'walkS'); var w = animOf(a, nm); return w[a.fi % 8]; }
   var fr = a.anim && a.anim[a.fi]; return fr ? fr[0] : animOf(a, 'idleS')[0][0]; }
 MA.poseOf = poseOf;
 
@@ -110,7 +110,7 @@ function placeActors(){
 // Raum laden, ohne Übergang (Laden eines Spielstands, Neustart)
 function loadRoom(id){ var r = MA.ROOMS[id]; if (!r) throw new Error('kein Raum '+id);
   E.room = r; E.S = MA.RS(id); MA.GS.room = id; MA.dirty = true; MA.navDirty = true; E.selectedHs = null; E.hoverHs = null;
-  placeActors(); snapCamera(); if (r.load) r.load(MA.A); }
+  placeActors(); snapCamera(); if (MA.lifeReset) MA.lifeReset(); if (MA.extrasReset) MA.extrasReset(); if (r.load) r.load(MA.A); }
 MA.loadRoom = loadRoom;
 // Raumwechsel mit Abblende; from = Herkunft für die Eingänge
 MA.gotoRoom = async function(id, o){ o = o || {}; var from = o.from || (E.room ? E.room.id : null); E.syncPos();
@@ -139,23 +139,26 @@ function updateCamera(dt){ var r = E.room; if (!r || r.width <= W){ E.camX = 0; 
 // ---------------------------------------------------------------- Takt
 E.update = function(dt){ if (E.screen !== 'game' || E.paused) return; E.gt += dt; if (!MA.GS.ended) MA.GS.playMs += dt;
   Object.keys(MA.ACT).forEach(function(k){ updateActor(MA.ACT[k], dt); });
+  if (MA.lifeTick) MA.lifeTick(dt); if (MA.extrasTick) MA.extrasTick(dt);
   updateCamera(dt); if (MA.tickTimers) MA.tickTimers(); };
 
 // ---------------------------------------------------------------- Szenenbild
 var fb = new M.Buf(W, SH, P.k0); MA.fb = fb;
 var bg = null, layers = [];
-function rebuild(){ var r = E.room; bg = r.paint(E.S, MA.GS); layers = r.layers ? (r.layers(E.S, MA.GS) || []) : []; MA.dirty = false; }
+function rebuild(){ var r = E.room; if (MA.SC) MA.SC.rec = []; try { bg = r.paint(E.S, MA.GS); } finally { E.bgAnim = MA.SC ? MA.SC.rec : null; if (MA.SC) MA.SC.rec = null; } layers = r.layers ? (r.layers(E.S, MA.GS) || []) : []; MA.dirty = false; }
 MA.rebuild = function(){ MA.dirty = true; };
 function shadow(x, y, w){ w = w || 6; for (var dy = -1; dy <= 1; dy++) for (var dx = -w; dx <= w; dx++){ var q = (dx/w)*(dx/w)+(dy/1.6)*(dy/1.6); if (q > 1) continue; var xx = Math.round(x+dx), yy = Math.round(y+dy); if (xx < 0 || yy < 0 || xx >= W || yy >= SH) continue; if (q > 0.6 && M.bayer(xx, yy) > 0.5) continue; var k = yy*W+xx; fb.d[k] = M.DN[fb.d[k]]; } }
 function blitLayer(L, cam){ var ox = Math.round(L.ox-cam), oy = L.oy; for (var j = 0; j < L.h; j++){ var y = oy+j; if (y < 0 || y >= SH) continue; for (var i = 0; i < L.w; i++){ var x = ox+i; if (x < 0 || x >= W) continue; var c = L.d[j*L.w+i]; if (c !== T) fb.d[y*W+x] = c; } } }
 MA.renderScene = function(){ var r = E.room; if (!r) return fb; if (MA.dirty || !bg) rebuild();
   var cam = Math.round(E.camX), view = { cam: cam, gt: E.gt, S: E.S, GS: MA.GS };
   for (var y = 0; y < SH; y++){ var row = y*bg.w; for (var x = 0; x < W; x++){ var sx = x+cam; fb.d[y*W+x] = (sx >= 0 && sx < bg.w) ? bg.d[row+sx] : P.k0; } }
+  if (MA.drawBgAnim) MA.drawBgAnim(fb, view);
   if (r.dynamic) r.dynamic(fb, view);
   var items = [];
   Object.keys(MA.ACT).forEach(function(k){ var a = MA.ACT[k]; if (a.visible) items.push({ a: a, base: a.y }); });
   layers.forEach(function(L){ if (!L.hide) items.push({ L: L, base: L.base }); });
   if (r.props) (r.props(view) || []).forEach(function(p){ items.push({ p: p, base: p.base }); });   // bewegliche Dinge (Ball, Plakatecke …)
+  if (MA.extrasProps) MA.extrasProps(view).forEach(function(p){ items.push({ p: p, base: p.base }); });   // Statisten (Tauben, Katze, Passanten)
   items.sort(function(a, b){ return a.base-b.base; });
   items.forEach(function(it){
     if (it.L) blitLayer(it.L, cam);

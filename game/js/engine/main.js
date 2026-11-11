@@ -37,6 +37,8 @@ function bindInput(){ var stage = $('stage');
   // Mobile Browser verschieben einen Fingertipp zum nächsten „anklickbaren“ Element (Touch Adjustment). Ohne eigenen Klick-Hörer zählt
   // die Szene nicht dazu, und ein Tipp knapp über der Leiste landet auf „Notizen“ oder einem Inventarfeld. Der leere Hörer verhindert das.
   $('scene').addEventListener('click', function(){});
+  stage.addEventListener('pointerdown', function(){ if (MA.lifeInput) MA.lifeInput(); }, true);
+  document.addEventListener('keydown', function(){ if (MA.lifeInput) MA.lifeInput(); }, true);
   stage.addEventListener('pointerdown', function(ev){ if (onUIElement(ev.target)) return; if (ev.button > 0) return; UI.setTouch(ev.pointerType !== 'mouse'); downAt = { x: ev.clientX, y: ev.clientY, t: Date.now() }; });
   stage.addEventListener('pointerup', function(ev){ if (onUIElement(ev.target) || !downAt) return; if (ev.button > 0) return; var d = downAt; downAt = null; if (Math.hypot(ev.clientX-d.x, ev.clientY-d.y) > 24) return; sceneTap(ev.clientX, ev.clientY, ev.pointerType !== 'mouse'); });
   stage.addEventListener('pointermove', function(ev){ if (ev.pointerType === 'mouse') sceneHover(ev.clientX, ev.clientY); });
