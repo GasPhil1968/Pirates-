@@ -137,7 +137,7 @@ function updateCamera(dt){ var r = E.room; if (!r || r.width <= W){ E.camX = 0; 
   E.camX = Math.max(0, Math.min(r.width-W, E.camX)); }
 
 // ---------------------------------------------------------------- Takt
-E.update = function(dt){ if (E.screen !== 'game' || E.paused) return; E.gt += dt; if (!E.busy || E.countBusy) MA.GS.playMs += dt;
+E.update = function(dt){ if (E.screen !== 'game' || E.paused) return; E.gt += dt; if (!MA.GS.ended) MA.GS.playMs += dt;
   Object.keys(MA.ACT).forEach(function(k){ updateActor(MA.ACT[k], dt); });
   updateCamera(dt); if (MA.tickTimers) MA.tickTimers(); };
 
