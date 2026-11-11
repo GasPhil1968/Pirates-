@@ -22,7 +22,8 @@ Der Lesezugang `window.MADV` liefert nur Positionen und Zustände zum Prüfen; e
 | Start über `file://` | Chromium | Titelbild, Pixelschrift geladen, neues Spiel startet | **bestanden** |
 | Ausgeliefertes ZIP | entpackt, eigener Server | Fassung im Titel, alle 43 Einträge des Service Workers abrufbar (HTTP 200), keine fehlerhaften Antworten, neues Spiel startet | **bestanden** |
 
-Zeitliche Einordnung: Die Durchläufe A (Desktop, iPhone) und B liefen auf dem Endstand bis auf zwei kleine, spät ergänzte Touch-Korrekturen (Szene als Klickziel, Mindestbreite des ✕). Der iPad-Durchlauf, die Layoutprüfung und der ZIP-Test liefen danach auf dem ausgelieferten Stand.
+Zeitliche Einordnung: Alle Läufe wurden nach der Überarbeitung von Grafik, Bewegung und Eigenleben (Abschnitt 2a) wiederholt, mit unveränderten Ergebnissen: A Desktop, iPhone und iPad je 42/42, B 29/29, Karte 10/10, Layout ohne Befund, keine Browserfehler.
+Der Desktop-Durchlauf A, die Kartenprüfung und die Layoutprüfung liefen zuletzt auf dem ausgelieferten Stand. iPhone, iPad und B liefen kurz davor, vor einer kleinen Korrektur der Lehrerposition im Klassenzimmer.
 
 ## 2. Abdeckung der geforderten Prüfungen
 
