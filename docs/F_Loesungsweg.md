@@ -108,7 +108,7 @@ Nach dem Abholauftrag (Schritt 4) sind fast immer mehrere Aufgaben gleichzeitig 
 
 ### 16. Signal und Flucht (C4, S30–S31)
 51. **Straßensperre**: *Pfeife* *Benutze* → „Zwei kurze Pfiffe“ → Jovan geht nach vorn (braucht gelesene Vorschrift, Dragan an der Passage, offenes Tor).
-52. **Dragan** ansprechen (oder **Passage** *Benutze*) → Dragan entkommt → *Ausweis III/4*.
+52. **Dragan** ansprechen → Dragan entkommt → *Ausweis III/4*.
     - Falsches Signal: „Übe leiser.“; zu früh: „Noch nicht …“
 
 ### 17. Finale (S32–S35)
