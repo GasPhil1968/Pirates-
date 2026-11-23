@@ -1,6 +1,6 @@
 # M. Adventure – Kapitel Mostar 1955 „Der Genosse kommt!“
 
-Point-and-Click-Adventure im Browser, deutsch. Erste spielbare Umsetzung aus dem Spielkonzept „M. Adventure“: das Kapitel **Mostar 1955** als abgeschlossener Abschnitt mit Einstieg, drei verbundenen Rätselketten, Finale und Abschlussbild. Grafik, Bedienung und Technik folgen der untersuchten MALA-Fassung („Die Stillen“); Inhalte, Figuren und Orte stammen aus dem PDF bzw. sind als eigene Ergänzungen gekennzeichnet.
+Point-and-Click-Adventure im Browser, deutsch. Erste spielbare Umsetzung aus dem Spielkonzept „M. Adventure“: das Kapitel **Mostar 1955** (Fassung 1.1 mit erweiterten Rätseln) als abgeschlossener Abschnitt mit Einstieg, drei verbundenen Rätselketten, Finale und Abschlussbild. Grafik, Bedienung und Technik folgen der untersuchten MALA-Fassung („Die Stillen“); Inhalte, Figuren und Orte stammen aus dem PDF bzw. sind als eigene Ergänzungen gekennzeichnet.
 
 ## Starten
 - `game/index.html` im Browser öffnen, oder `python3 -m http.server` im Ordner `game/` und `http://localhost:8000` aufrufen.
@@ -13,7 +13,7 @@ Point-and-Click-Adventure im Browser, deutsch. Erste spielbare Umsetzung aus dem
 | `game/js/lib/` | Grafik- und Figurentechnik aus MALA (indizierte Palette, Malkasten, Figuren-Rig), unverändert übernommen bis auf den Spieltitel |
 | `game/js/engine/` | Engine von M. Adventure: Zustand und Spielstände (`core.js`), Räume/Wege/Darstellung (`world.js`), Skript-API und Interaktion (`script.js`), Eigenleben der Figuren (`life.js`), Statisten und Bewegung im Hintergrund (`extras.js`), Oberfläche (`ui.js`, `ui_panels.js`), Start und Eingabe (`main.js`) |
 | `game/js/art/` | Detail-Zeichner für das MALA-Rig (`rig_detail.js`), Köpfe (`heads.js`), Bewegungen (`anims.js`), Figuren (`cast.js`), Porträts, Gegenstandssymbole, Hintergründe der Orte mit Zusatzdetails (`details.js`), Titelbild und Stadtplan |
-| `game/js/content/` | Inhalte: Gegenstände und Kombinationen, Notizen, Rätsel-Nahansichten, Orte mit Hotspots und Dialogen, Kapitelablauf |
+| `game/js/content/` | Inhalte: Gegenstände und Kombinationen, Notizen, Rätsel-Nahansichten (`puzzles.js`, seit 1.1 auch `werkbank.js`), Orte mit Hotspots und Dialogen (seit 1.1 mit Hinterhof), Kapitelablauf |
 | `docs/` | A Quellenanalyse · B Gesamtstruktur · C Kapitelentwurf Mostar · C2 Styleguide · F Prüfbericht · F Lösungsweg · LIESMICH (Startanleitung für das ZIP) |
 | `tools/` | Testfahrer und Durchläufe (Playwright), Layoutprüfung, Prüfblätter für Räume und Figuren, Icon-Erzeugung, Build |
 

@@ -14,7 +14,7 @@ Der Lesezugang `window.MADV` liefert nur Positionen und Zustände zum Prüfen; e
 | --- | --- | --- | --- |
 | Durchlauf A `tools/playthrough.js` | Desktop 1280×800, Maus | kompletter Weg Titel → Abschlussbild → Hauptmenü; dazu Fehlversuche (Kohlepapier ohne Verschieben, zu frühe Unterschrift, falscher Knopf, falsches Signal, „Ich heiße M.“) und Speichern auf Platz 1 vor dem Finale | **bestanden**, 44/44 Schritte (Fassung 1.1), keine Browserfehler |
 | Durchlauf A | „iPhone 13 landscape“ (Touch-Emulation, 750×342, Seitenleisten-Layout) | derselbe Weg mit Fingertipps (auch Inventar, Antworten und Menüs getippt) | **bestanden**, 44/44 Schritte (Fassung 1.1), keine Browserfehler |
-| Durchlauf A | „iPad (gen 7) landscape“ (Touch-Emulation, 1080×810, Standardlayout) | derselbe Weg mit Fingertipps | IPAD |
+| Durchlauf A | „iPad (gen 7) landscape“ (Touch-Emulation, 1080×810, Standardlayout) | derselbe Weg mit Fingertipps | **bestanden**, 44/44 Schritte (Fassung 1.1), keine Browserfehler |
 | Durchlauf B `tools/playthrough_b.js` | Desktop 1280×800 | andere Reihenfolge, rund 30 Fehlversuche, richtiges Signal zu früh (wird verweigert), Ball mit der Fahne statt dem Stecken, Speichern auf Platz 2 → Seite neu laden → Platz 2 laden (Raum, Inventar, Zustand verglichen), „Fortsetzen“ über das Titelbild mit Rückblick „Zuletzt“ | **bestanden**, 29/29 Schritte (Fassung 1.1), 818 Dialogzeilen, keine Browserfehler |
 | Layoutprüfung `tools/layout_check.js` | 8 Profile: Desktop 1280×800 und 1024×640, iPad (7. Gen.) quer, Galaxy S24 quer, iPhone 16 Pro Max quer, iPhone 13 quer, iPhone SE quer, iPhone 13 hoch | Titel, Verben, Gespräch, Gegenstandswahl, Notizen, Karte, Menü, Einstellungen, Rätsel. Per DOM geprüft: Knöpfe innerhalb der Bühne, abgeschnittene Beschriftungen, Tippflächen unter 24 px, sichtbarer Schließen-Knopf | erster Lauf: viele Befunde auf Telefonen und Tablet (Abschnitt 3); nach den Korrekturen **ohne Befund** auf allen 8 Profilen, keine Browserfehler |
 | Karte `tools/map_check.js` | Desktop | nur bekannte Orte sichtbar; „Stari Most“ nach Nedims Hinweis bekannt, aber ohne Auftrag gesperrt mit Grund; aus Innenräumen keine Reise; mit Auftrag Markt und Brücke offen, Sperre/Paradestraße weiter unbekannt; Reise über die Karte | **bestanden**, 10/10 Prüfungen |
@@ -111,7 +111,8 @@ Beide Durchläufe wurden auf den neuen Weg umgeschrieben. Sie spielen jede neue 
 Befund aus den Läufen:
 - Die Fehlschläge in den ersten Läufen kamen alle vom Testskript (Zähler im Zuschnitt läuft nach 4 auf 0, ein fehlender Schritt), nicht vom Spiel.
 - Die **Passage** an der Sperre lässt sich nicht *benutzen*, solange Dragan davor steht: Der Tipp trifft ihn. Das ist keine Sackgasse, weil *Dragan ansprechen* dieselbe Flucht auslöst. Der alternative Weg über die Passage ist damit aber praktisch nicht erreichbar.
-- Die Kartenprüfung ist bestanden (10/10). Layoutprüfung: LAYOUT.
+- Die Kartenprüfung ist bestanden (10/10). Layoutprüfung auf acht Profilen: ohne Befund.
+- **Gefunden und behoben:** Die Layoutprüfung erfasst keine Nahansichten. Deshalb wurden die neuen Nahansichten zusätzlich auf „iPhone 13 landscape“ und „iPhone SE landscape“ vermessen. Ergebnis: Die Nahansicht war dort 194 px hoch, ihr Inhalt 228 px. Die Knöpfe lagen fast ganz unter dem Rand, die Beschriftung war nicht zu sehen; erreichbar waren sie nur durch Scrollen. Behoben in `game.css` für flache Bühnen (`#stage.short`): Das Bild wird so weit verkleinert, dass Titel, Text und Knöpfe ohne Scrollen passen; das Seitenverhältnis bleibt, damit die Tippkoordinaten stimmen. Nachgemessen: Inhalt 194 von 194 px. iPad und Desktop sind unverändert.
 
 ## 3. Gefundene und behobene Fehler
 

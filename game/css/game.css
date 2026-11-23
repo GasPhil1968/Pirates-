@@ -239,3 +239,8 @@ body.busy #scene{ cursor:default !important; }
 @media(max-height:500px){.puzzle .ptitle{padding:2px}.puzzle .psay{padding:3px 12px}.puzzle .pc{width:min(82vh,65%)}.puzzle .pbtns{gap:3px}}
 .card:has(.memory-art){max-width:min(90%,calc(var(--u)*240));padding:calc(var(--u)*3);font-size:clamp(14px,calc(var(--u)*7),24px);}
 .memory-art{display:block;image-rendering:pixelated;width:100%;max-height:35vh;object-fit:contain;margin:0 auto .55em;}
+/* Flache Bühnen (Telefon quer): Bild nur so hoch, dass Text und Knöpfe ohne Scrollen sichtbar bleiben; Seitenverhältnis bleibt (Tippkoordinaten). */
+#stage.short .puzzle .ptitle{ padding:1px; }
+#stage.short .puzzle .psay{ font-size:12px; min-height:2.5em; padding:2px 10px; }
+#stage.short .puzzle .pc{ width:auto; height:calc(100% - 100px); min-height:64px; max-width:96%; }
+#stage.short .puzzle .pbtns{ padding-bottom:2px; }

@@ -1,5 +1,7 @@
 # C. Kapitelentwurf: Mostar 1955 – „Der Genosse kommt!“
 
+> **Hinweis zur Fassung 1.1:** Die Rätselketten wurden nach diesem Entwurf erweitert (Zuschnitt, Packplatz, Tischfuß, Rinne, Bergung, Zeichenkarten, Hinterhof, Sandale mit Nagel und Draht, Kleister nach dem Sportteil, Tafel gegen Pfeife, Platz III/4, Erinnerungsbild Podaca). Maßgeblich für den aktuellen Weg ist `F_Loesungsweg.md`, die Prüfergebnisse stehen in `F_Pruefbericht.md`, Abschnitt 2b.
+
 Grundlage: PDF Abschnitt 8 (Figurenfassung, Drehbuch S01–S35, Wiederkehr- und Fehlversuchstexte). Die Dialogzeilen des PDF werden weitgehend wörtlich verwendet. Weil das PDF die V168-Rätsel nur andeutet und für den Neubau ausdrücklich freigibt, ist die **Rätselmechanik neu und vollständig ausgearbeitet**; Ergänzungen sind mit **[Eigen]** markiert. Zeitraum: 1955, ein warmer Nachmittag, FNR Jugoslawien; „Tiko“ ist die verfremdete Figur des PDF. **Bewusste fiktionale Verdichtung:** Schule, Markt, Stari Most und Paradestraße liegen näher beieinander als in der wirklichen Stadt; der Schulgründer (gest. 1898), seine Büste und Dedos Waren sind erfunden; Preise in Dinar sind Spielwerte, keine historischen Angaben.
 
 ---
