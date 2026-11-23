@@ -6,10 +6,10 @@ function F(k){ return MA.flag(k); }
 
 // ---------------------------------------------------------------- Stadtplan: nur bekannte Orte; gesperrte mit Grund
 MA.MAP.locs = [
-  { id: 'schule', name: 'Schule', x: 92, y: 52, room: 'hof', rooms: ['hof', 'klasse', 'fenster'], entry: [330, 120, 'L'], known: function(){ return true; },
+  { id: 'schule', name: 'Schule', x: 92, y: 52, room: 'hof', rooms: ['hof', 'klasse', 'fenster', 'hinterhof'], entry: [330, 120, 'L'], known: function(){ return true; },
     open: function(G){ return true; } },
   { id: 'markt', name: 'Markt', x: 176, y: 74, room: 'markt', entry: [210, 124, 'F'], known: function(G){ return !!G.flags['list.fixed']; },
-    open: function(G){ if (G.flags['crate.carry'] && G.flags['sandal'] !== 'fixed') return 'Mit der Kiste und dieser Sandale komme ich nicht weit.'; return true; } },
+    open: function(G){ return true; } },
   { id: 'most', name: 'Stari Most', x: 236, y: 98, room: 'most', entry: [40, 92, 'R'], known: function(G){ return !!G.flags['know.dragan'] || !!G.flags['seen.most']; }, open: function(G){ return !!G.flags['list.fixed'] ? true : 'Ohne Auftrag darf ich nicht vom Schulhof.'; } },
   { id: 'sperre', name: 'Straßensperre', x: 120, y: 104, room: 'sperre', entry: [30, 124, 'R'], known: function(G){ return !!G.flags['seen.sperre'] || !!G.flags['list.fixed'] && !!G.flags['seen.markt']; }, open: function(G){ return true; } },
   { id: 'parade', name: 'Paradestraße', x: 66, y: 120, room: 'parade', known: function(G){ return !!G.flags['seen.sperre']; }, open: function(G){ return 'Nur durch Jovans Absperrung.'; } }

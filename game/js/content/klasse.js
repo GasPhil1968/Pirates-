@@ -42,7 +42,8 @@ async function lehrerTalk(A){ var L = A.npc('lehrer');
 async function s06(A){ var L = A.npc('lehrer');
   await L.say('Das ist der Aufstellungsplan.'); await A.say('Ja.'); await L.say('Auf Packkarton.'); await A.say('Der Plan allein hält die Flaschen nicht auseinander.'); await L.say('Hast du die Stärke der Stege berücksichtigt?'); await A.say('Sonst passt die letzte Reihe nicht.');
   await A.wait(600); await L.say('Gut.'); await A.say('Darf ich es dann so machen?'); await L.say('Du hast es doch gerade begründet.'); await A.say('Das gilt sonst nicht immer.'); await L.say('Heute schon.');
-  await A.anim('reachM'); A.swap('raster', 'einsatz'); A.set('einsatz.cut'); await A.say('Ich schneide zwölf Löcher. Bei III/4 genauso sorgfältig wie bei den anderen.');
+  if (await A.puzzle('zuschnitt') !== 'ok') return;
+  await A.anim('reachM'); A.swap('raster', 'einsatz'); A.set('einsatz.cut'); await A.say('Zwei lange Stege, drei kurze. Die Schlitze gehen jeweils bis zur Mitte. III/4 bekommt genauso viel Platz wie die anderen.');
   await L.say('Prüfe die Maße, bevor du weiter schneidest.'); await A.say('Das klingt, als hätten Sie Erfahrung damit.'); if (F('list.fixed')) await L.say('Jeder Lehrer hat Erfahrung mit zu kurzen Dingen.'); }
 async function s16(A){ var L = A.npc('lehrer'); A.take('beutel'); A.note('n_beutel', 'done'); A.set('bag.delivered');
   await L.say('Kreide, Vorlagen, Schreibmaterial. Gut.'); await A.say('Mara hat gesagt, ausdrücklich für Sie.'); await L.say('Sie kennt ihre Kundschaft.'); await A.say('Sind Sie Kundschaft?'); await L.say('Heute bin ich für erstaunlich viele Dinge verantwortlich.'); await A.say('Auch für die Tafel?'); await L.say('Was ist mit der Tafel?');
@@ -82,10 +83,11 @@ MA.rehearsal = async function(A, attempt){ MA.E.cutscene = true;
     if (!word){ await A.kids('Živio drugi Tiko! LAUT UND DEUTLICH!'); await J.say('Wir können es noch einmal genauso machen.'); await A.say('Das befürchte ich.'); await L.say('Die Tafel, M. Erst die Tafel.'); }
     else if (!roles){ await A.kids(F('role.jasna') ? 'Živio drug Tiko!' : 'Živio … drug … Tiko!'); if (!F('role.nedim')){ await N.say('Fertig?'); await A.kids('FERTIG?'); }
       await L.say(F('role.jasna') ? 'Wer achtet hier eigentlich auf die Pause?' : 'Wer liest vor? Alle gleichzeitig ist nicht vorlesen.'); await A.say('Jeder braucht seine Aufgabe.'); }
-    else { await A.say('Auf mein Zeichen.'); await A.anim('wave'); await A.kids('Živio drug Tiko!'); await A.wait(900); await L.say('Genau so.');
+    else if (!A.has('karten')){ await N.say('Von ganz hinten sehe ich deine Hand kaum.'); await J.say('Beim Packen bleiben helle Kartonstreifen übrig. Auf die passen zwei Zeichen.'); }
+    else { await A.say('Erst der Mund, dann die Hand. Achtet auf die Karten.'); await A.anim('wave'); await A.kids('Živio drug Tiko!'); await A.wait(900); await L.say('Genau so.');
       await N.say('Ich –'); await J.say('Pause.'); await L.say('Danke, Jasna.'); await N.say('Ich wollte „fertig“ sagen.'); await J.say('Das haben wir gehört, weil du nichts gesagt hast.');
       await L.say('M., das war brauchbar.'); await A.say('Nur brauchbar?'); await L.say('Sehr brauchbar. Treib es nicht zu weit.');
-      A.set('probe.ok'); A.take('vorlage'); A.note('n_probe', 'done'); }
+      A.set('probe.ok'); A.take('karten'); A.take('vorlage'); A.note('n_probe', 'done'); }
   }
   await A.fade(1, 300); A.despawn('lehrer'); A.cam(null); MA.loadRoom('hof'); A.place(104, 132, 'L'); await A.fade(0, 300); A.save(); };
 
@@ -142,6 +144,8 @@ MA.defineRoom({ id: 'fenster', name: 'Fenster zum Hinterhof', indoor: true, noAc
   enter: async function(A){ if (A.first('fenster.first')) await A.say(F('win.open') ? 'Unten der Hinterhof, das Tor, dahinter die Passage.' : 'Durch die Scheibe: der Hinterhof, das Tor zur Passage.'); },
   hotspots: [
     { id: 'zurueck', name: 'Zurück ins Klassenzimmer', r: [0, 120, 36, 24], exit: { to: 'klasse' } },
+    { id:'hoftreppe', name:'Über die Treppe in den Hinterhof', r:[5,60,54,54], pri:1,
+      vis:function(S,G){return G.flags['win.open'];}, exit:{to:'hinterhof'} },
     { id: 'zurueck2', name: 'Zurück ins Klassenzimmer', r: [284, 0, 36, 40], exit: { to: 'klasse' } },
     { id: 'fluegel', name: 'Fensterflügel', r: [70, 6, 180, 30], pri: 4,
       look: function(A){ return guardHeld(A, function(){ return A.say(F('win.open') ? 'Beide Flügel stehen offen. Unten der Hinterhof.' : 'Das Fenster ist zu. Der Griff klemmt nicht.'); }); },
@@ -167,14 +171,15 @@ MA.defineRoom({ id: 'fenster', name: 'Fenster zum Hinterhof', indoor: true, noAc
 async function riegelLeine(A){ if (F('latch.held')){ await A.say('Ich halte sie ja schon.'); return; }
   if (!F('win.open')){ await A.say('Durch die geschlossene Scheibe? Erst das Fenster.'); return; }
   if (F('gate.offen')){ await A.say('Das Tor steht schon offen.'); return; }
+  if (F('line.atWindow')) return A.say('Die Leine hängt schon am Riegel.');
+  if (!A.has('stecken') && !A.has('fahne') && !A.has('rohling') && !A.has('klebstab')) return A.say('Die Öse sitzt zu weit innen. Ich brauche etwas Langes, um die Schlinge hinüberzuschieben.');
   A.take('leine'); A.set('latch.held'); MA.touch();
-  await A.say('Ich lasse die Leine mit einer Schlinge hinunter, fange den Ring und ziehe. Der Riegel geht hoch.'); await A.say('Auf geht es. Aufbleiben ist das Problem.'); }
+  await A.say('Ich lege die Schlinge über die Stockspitze, führe sie durch den Ring und ziehe. Der Riegel geht hoch.'); await A.say('Auf geht es. Aufbleiben ist das Problem.'); }
 async function bustLine(A){ if (F('latch.held')) return bustPush(A); await A.say('Ich müsste die Leine erst irgendwo einhängen, damit es sich lohnt, sie festzuklemmen.'); }
 async function bustPush(A){ if (F('line.atWindow')){ await A.say('Er hält die Leine. Er nimmt seine neue Aufgabe ernst.'); return; }
   if (F('bust.moved') && !F('latch.held')){ await A.say('Der Schulgründer steht schon am Fenster.'); return; }
   if (!F('latch.held')){ await A.say('Der Schulgründer steht gut, wo er steht. Ich brauche einen Grund, ihn zu bewegen.'); return; }
   A.set('latch.held', false); A.set('bust.moved'); A.set('line.atWindow'); MA.touch();
   await A.say('Ich schiebe den Schulgründer mit der Schulter auf das Leinenende. Er wiegt mehr als meine Geduld.'); await A.say('Jetzt beaufsichtigt der Schulgründer den Hof.');
-  await A.wait(500); A.set('gate.offen'); MA.touch(); A.note('n_tor', 'done');
-  await A.say('Unten schwingt das Tor auf, langsam, bis an die Mauer. Klack – es hängt am Haken.'); }
+  await A.say('Der Flügel öffnet sich eine Handbreit und bleibt am Pflaster hängen. Den Haken an der Mauer erreicht er so nicht. Die Hoftreppe liegt gleich nebenan.'); }
 })(MA);

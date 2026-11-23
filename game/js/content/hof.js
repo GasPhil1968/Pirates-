@@ -33,7 +33,7 @@ async function showFlag(A, id){ var B = A.npc('branko');
   await B.say('Das Material gehört in die Prüfung.'); }
 // S23: in die richtige Ablage legen -> Stempel
 async function trayMat(A, ctx){ var id = ctx.item, B = A.npc('branko');
-  if (id !== 'fahne' && id !== 'zeitung'){ await B.say(id === 'lieferschein' || id === 'schein_ok' ? 'Lieferscheine prüft der Empfänger, nicht der Ordner.' : 'Das ist kein Material für die Parade.'); return; }
+  if (['fahne','zeitung','rohling','klebrand'].indexOf(id) < 0){ await B.say(id === 'lieferschein' || id === 'schein_ok' ? 'Lieferscheine prüft der Empfänger, nicht der Ordner.' : 'Das ist kein Material für die Parade.'); return; }
   if (F('flag.stamped')) return showFlag(A, id);
   await A.anim('reachL'); await A.say(id === 'fahne' ? 'Ich lege die Fahne flach in die Ablage. Die Zeitung nach oben.' : 'Ich lege die Zeitung flach in die Ablage.');
   await B.say('Zur Materialprüfung?'); await A.say('Liegt in der richtigen Ablage.'); await B.say('Immerhin.');
@@ -55,7 +55,7 @@ async function jasnaTalk(A){ var J = A.npc('jasna');
     { t: 'Vielleicht müsste man die Kinder festbinden.', once: 'j.bind', go: async function(){ await J.say('Dann stimmen die Reihen. Aber der Lehrer bekommt sie nicht mehr ins Klassenzimmer.'); await A.say('Das wäre ein zweiter Vorteil.'); await J.say('Für dich vielleicht.'); } },
     { t: 'Wo ist Dragan denn?', go: async function(){ await J.say('An der Brücke, schätze ich. Er hat heute früh seinen Ball über die Brüstung gekickt. „Zur Probe“, sagt er.'); await A.say('Zur Probe wofür?'); await J.say('Fürs Wegsein.'); A.set('know.dragan'); A.note('n_dragan'); } },
     { t: 'Du liest die Zeile im Rahmen vor.', if: F('probe.failed1') && !F('role.jasna'), go: async function(){ await J.say('Nur die Zeile?'); await A.say('Nur die Zeile.'); await J.say('Und wenn der Lehrer dazwischenredet?'); await A.say('Dann warten wir, bis er fertig ist.'); await J.say('Gut. Das kann ich schon.'); A.set('role.jasna'); } },
-    { t: 'Kommt ihr mit zu Dedo? Wir rufen etwas anderes.', if: F('probe.ok') && (F('dedo.deal') || A.has('tafel')) && !F('ad.done'), go: adStart },
+    { t: 'Kommt ihr mit zu Dedo? Wir rufen etwas anderes.', if: F('probe.ok') && (F('dedo.deal') || A.has('tafel')) && !F('ad.done') && !F('ad.sold'), go: adStart },
     { t: 'Wofür brauchst du das Raster? – Schon gut.', if: false },
     { t: 'Bis gleich.', bye: true }
   ]; }); }
@@ -96,6 +96,7 @@ async function benchUse(A, ctx){ var id = ctx.item, N = A.npc('nedim');
   if (id === 'loeffel' || id === 'loeffel_k'){
     if (id === 'loeffel_k') await A.say('Der Hals ist frei. Der Kleister bleibt in der Mulde.');
     if (!F('heft.placed') || !F('nedim.holds')){ if (F('nedim.agreed') && !F('heft.placed')) await N.say('Und wohin soll die Murmel? Ich möchte sie nicht noch genauer verlieren.'); else await A.say('Wenn ich sie so anstoße, rollt sie unter die Bank. Das Ende müsste hoch, und unten müsste etwas liegen.'); return; }
+    if (await A.puzzle('rinne') !== 'ok') return;
     await A.anim('reachL'); await A.say('Nur noch einen Moment.'); await A.wait(400);
     A.set('marble.out'); A.set('heft.placed', false); A.set('nedim.holds', false); N.freeze(null); A.give('murmel'); A.give('heft'); A.note('n_murmel', 'done');
     await A.say('Sie rollt die Fuge entlang, über die Kante – ins Heft.');
@@ -144,6 +145,9 @@ MA.defineRoom({ id: 'hof', name: 'Schulhof', width: K.W,
     { id: 'abl_liste', name: 'Ablage „Liste“', r: [138, 94, 14, 8], st: [146, 124, 'B'], look: 'Ablage LISTE. Darin liegt nichts. Die Liste hält Branko selbst.', on: { '*': function(A, c){ return trayWrong(A, c, 'liste'); } } },
     { id: 'abl_mat', name: 'Ablage „Materialprüfung“', r: [154, 94, 14, 8], st: [160, 124, 'B'], look: 'Ablage MATERIALPRÜFUNG. Was hier liegt, wird gestempelt.', on: { '*': trayMat } },
     { id: 'abl_sonst', name: 'Ablage „Sonstiges“', r: [170, 94, 14, 8], st: [176, 124, 'B'], look: 'Ablage SONSTIGES. Ein Radiergummi und ein Knopf ohne Mantel.', on: { '*': function(A, c){ return trayWrong(A, c, 'sonst'); } } },
+    { id:'glocke', name:'Schulglocke', r:[111,55,13,17], st:[117,112,'B'],
+      look:'Eine kleine Messingglocke am Eingang. Von hier kann der Lehrer sie durch das offene Fenster hören.',
+      use:async function(A){if(F('probe.ok')) return A.say('Für heute hat die Schule genug gerufen.'); if(!F('probe.failed1'))return A.say('Der Lehrer hat noch keinen Einsatz gegeben.'); await A.say('Ich ziehe die Schnur. Im Fenster erscheint der Lehrer.');return MA.rehearsal(A,2);} },
     { id: 'stempel', name: 'Stempel', r: [180, 92, 8, 9], st: [180, 124, 'B'], look: 'Ein Stempel mit Kissen. Er sagt GEPRÜFT, wenn Branko es will.', take: async function(A){ await A.npc('branko').say('Der Stempel bleibt beim Ordner.'); } },
     { id: 'plan', name: 'Aufstellungsplan', r: [190, 70, 32, 26], st: [206, 120, 'B'],
       look: async function(A){ await A.say('Brankos Aufstellungsplan: drei Reihen, vier Plätze, in jedem Feld ein Name. Bei III/4 steht Dragan, rot unterstrichen.'); if (A.has('karton') && !A.has('raster')) await A.say('Drei Reihen, vier Plätze. Wie Maras Kiste.'); },

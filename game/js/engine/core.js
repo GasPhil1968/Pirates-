@@ -5,8 +5,8 @@
 var MA = window.MA || {};
 (function(MA){
 'use strict';
-MA.VERSION = '1.0.0';
-MA.BUILD = '11.11.2026 · c18c0c';
+MA.VERSION = '1.1.0';
+MA.BUILD = '23.11.2026 · 214a48';
 MA.KEY = 'madv.v1.';
 MA.W = 320; MA.SH = 144; MA.H = 200;
 
@@ -86,6 +86,15 @@ MA.latestSave = function(){ var best = null; ['auto'].concat([1,2,3,4,5].map(fun
 // Stand prüfen und in einen sauberen Spielstand übernehmen: unbekannte Gegenstände/Notizen fallen heraus
 MA.validate = function(G0){ var base = MA.fresh(); Object.keys(base).forEach(function(k){ if (G0[k] !== undefined) base[k] = G0[k]; });
   base.inv = (base.inv || []).filter(function(id, i, a){ return MA.ITEMS[id] && a.indexOf(id) === i; });
+  if (base.flags.packed && !base.flags['cards.issued'] && !base.flags['probe.ok']){
+    if (!base.inv.includes('streifen') && !base.inv.includes('karten')) base.inv.push('streifen');
+    base.flags['cards.issued'] = true;
+  }
+  if (base.flags['stecken.taken'] && !base.flags['table.parts']){
+    if (!base.inv.includes('nagel')) base.inv.push('nagel');
+    if (base.flags.sandal !== 'fixed' && !base.inv.includes('draht')) base.inv.push('draht');
+    base.flags['table.parts'] = true;
+  }
   Object.keys(base.notes || {}).forEach(function(id){ if (!MA.NOTES[id]) delete base.notes[id]; });
   base.noteOrder = (base.noteOrder || []).filter(function(id){ return MA.NOTES[id]; });
   if (!MA.ROOMS[base.room]) return null; return base; };

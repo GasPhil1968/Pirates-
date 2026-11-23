@@ -27,6 +27,7 @@ function paint(S, G){ var W = K.W, b = new M.Buf(W, 144, P.k0);
   var d = K.door; b.rect(d[0]-4, d[1]-6, d[2]+8, 6, P.s5); b.hl(d[0]-4, d[0]+d[2]+3, d[1]-6, P.s6); M.microText(b, 'SKOLA', d[0]+2, d[1]-5, P.k2); b.px(d[0]+3, d[1]-7, P.k2); b.px(d[0]+5, d[1]-7, P.k2);
   b.rect(d[0]-2, d[1], d[2]+4, 28, P.s4); b.rect(d[0], d[1]+1, d[2], 27, P.w1); b.rect(d[0]+1, d[1]+2, d[2]/2-2, 25, P.w2); b.rect(d[0]+d[2]/2+1, d[1]+2, d[2]/2-2, 25, P.w2); b.vl(d[0]+d[2]/2, d[1]+1, d[1]+27, P.w0); b.px(d[0]+d[2]/2-2, d[1]+14, P.y3); b.px(d[0]+d[2]/2+2, d[1]+14, P.y3);
   for (var st = 0; st < 3; st++){ b.rect(d[0]-4-st*2, 94+st*3, d[2]+8+st*4, 3, P.s4); b.hl(d[0]-4-st*2, d[0]+d[2]+3+st*2, 94+st*3, P.s6); }
+  b.hl(111,122,55,P.w1);b.vl(116,55,58,P.w1);b.ellipse(116,61,3,3,P.y2);b.rect(112,62,9,2,P.y3);b.px(116,65,P.m3);b.vl(118,64,70,P.e3);
   // Fahne über dem Eingang, Transparent zwischen den Geschossen
   b.line(95, 12, 104, 4, P.w2); SC.flagYU(b, 104, 4, 12, 9);
   SC.banner(b, 22, 47, 150, 9, 'ŽIVIO DRUG TIKO');

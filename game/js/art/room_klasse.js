@@ -62,7 +62,7 @@ function layers(S, G){ var out = [];
 
 // ---------------------------------------------------------------- Nahansicht: Fenster zum Hinterhof
 var KF = { win: [70, 6, 180, 112], gate: [126, 62, 66, 52], latch: [154, 74, 14, 22], hook: [212, 80, 8, 8], passage: [196, 30, 40, 40], bust: [262, 48, 36, 70], bustSill: [218, 92, 30, 32], sill: [40, 116, 240, 28], line: [150, 92, 30, 30] };
-function paintF(S, G){ var b = new M.Buf(320, 144, P.k1), open = !!G.flags['win.open'], gateOpen = !!G.flags['gate.offen'], held = !!G.flags['latch.held'];
+function paintF(S, G){ var b = new M.Buf(320, 144, P.k1), open = !!G.flags['win.open'], gateOpen = !!G.flags['gate.offen'], held = !!(G.flags['latch.held'] || G.flags['line.atWindow']);
   // Wand innen um das Fenster
   for (var y = 0; y < 144; y++) for (var x = 0; x < 320; x++) b.px(x, y, SC.plaster(x, y, R('s2 s3 s4'), undefined));
   var w = KF.win; b.rect(w[0]-6, w[1]-4, w[2]+12, w[3]+8, P.s5); b.rect(w[0]-3, w[1]-1, w[2]+6, w[3]+2, P.s6);
@@ -93,6 +93,7 @@ function paintF(S, G){ var b = new M.Buf(320, 144, P.k1), open = !!G.flags['win.
   else { [[w[0]-30, -1], [w[0]+w[2]+4, 1]].forEach(function(f){ for (var y4 = w[1]+2; y4 < w[1]+w[3]-2; y4++) for (var x4 = f[0]; x4 < f[0]+26; x4++){ var e = (x4 === f[0] || x4 === f[0]+25 || y4 === w[1]+2 || y4 === w[1]+w[3]-3) ? P.s6 : ((x4+y4) % 19 < 3 ? P.b4 : P.b2); b.px(x4, y4, e); } }); }
   // Fensterbank (Stein)
   var sl = KF.sill; b.rect(sl[0], sl[1], sl[2], sl[3], P.s4); b.hl(sl[0], sl[0]+sl[2]-1, sl[1], P.s6); b.hl(sl[0], sl[0]+sl[2]-1, sl[1]+1, P.s5); b.rect(sl[0]+4, sl[1]+4, sl[2]-8, 1, P.s3);
+  if(open){ b.rect(4,78,47,18,P.w1); b.rect(6,80,43,14,P.w2); M.microText(b,'HOF',21,82,P.s6); b.line(14,87,10,90,P.s5); b.hl(10,16,90,P.s5); }
   // Leine (am Riegel eingehängt bzw. unter der Büste)
   if (held || G.flags['line.atWindow']){ var ex = KF.latch[0]+6, ey = (held ? KF.latch[1]-8 : KF.latch[1]-2); if (!G.flags['gate.offen']) for (var t = 0; t <= 1; t += 0.02){ var lx = Math.round(ex+(160-ex)*t), lyy = Math.round(ey+(118-ey)*t); b.px(lx, lyy, P.e4); } b.line(160, 118, KF.bustSill[0]+6, 119, P.e4); }
   return b; }

@@ -22,6 +22,9 @@ IC.schein_ok = icon(function(b){ paper(b, 8, 3, 16, 19, P.s5); b.hl(10, 21, 6, P
 IC.kiste = icon(function(b){ b.rect(4, 10, 24, 11, P.w2); b.hl(4, 27, 10, P.w4); b.hl(4, 27, 15, P.w1); for (var i = 0; i < 4; i++){ b.rect(7+i*5, 4, 3, 6, P.g3); b.px(8+i*5, 3, P.g2); b.px(7+i*5, 5, P.g5); } });
 IC.kiste_leer = icon(function(b){ b.rect(4, 10, 24, 11, P.w2); b.hl(4, 27, 10, P.w4); b.hl(4, 27, 15, P.w1); b.rect(6, 11, 20, 3, P.w0); });
 IC.sandale = icon(function(b){ b.poly([[6, 15], [24, 11], [27, 15], [8, 19]], P.w2); b.line(6, 15, 24, 11, P.w4); b.line(12, 13, 13, 8, P.w1); b.line(13, 8, 18, 9, P.w1); b.line(19, 12, 22, 7, P.w1); b.px(23, 6, P.w1); });
+IC.draht = icon(function(b){ b.ellipse(15,13,9,5,P.m3); b.ellipse(15,13,8,4,T); b.line(21,10,27,5,P.m4); });
+IC.nagel = icon(function(b){ b.line(6,19,23,6,P.m4); b.line(19,4,26,9,P.m3); });
+IC.flickzeug = icon(function(b){ b.ellipse(11,11,5,3,P.m3); b.ellipse(11,11,4,2,T); b.line(14,12,25,17,P.e4); b.line(24,17,28,13,P.e3); });
 IC.senkel = icon(function(b){ for (var x = 5; x < 27; x++){ var y = 12+Math.round(Math.sin(x*0.5)*4); b.px(x, y, P.e4); b.px(x, y+1, P.e2); } b.rect(4, 15, 2, 2, P.m3); b.rect(26, 9, 2, 2, P.m3); });
 IC.schuh = icon(function(b){ b.poly([[5, 9], [13, 9], [16, 13], [27, 15], [27, 19], [5, 19]], P.w1); b.hl(5, 27, 19, P.k2); b.rect(5, 17, 6, 3, P.k2); b.line(14, 11, 18, 13, P.s5); b.line(15, 13, 19, 11, P.s5); b.hl(6, 12, 10, P.w2); });
 IC.stecken = icon(function(b){ b.line(4, 20, 27, 4, P.w3); b.line(5, 20, 28, 4, P.w2); b.line(19, 8, 23, 12, P.m3); b.line(20, 8, 24, 12, P.m4); b.px(13, 13, P.m2); b.px(12, 14, P.m4); });
@@ -40,6 +43,8 @@ IC.tafel = icon(function(b){ b.rect(4, 5, 24, 15, P.w2); b.hl(4, 27, 5, P.w4); M
 IC.pfeife = icon(function(b){ b.rect(7, 10, 13, 6, P.m3); b.hl(7, 19, 10, P.m4); b.ellipse(22, 13, 4, 4, P.m3); b.ellipse(22, 13, 2, 2, P.k1); b.line(7, 12, 3, 4, P.r3); });
 IC.ball = icon(function(b){ b.ellipse(16, 12, 8, 8, P.s5); b.line(10, 9, 22, 15, P.w2); b.line(13, 5, 15, 19, P.w2); b.ellipse(16, 12, 2, 2, P.k2); b.px(12, 7, P.s6); });
 IC.ausweis = icon(function(b){ b.rect(6, 5, 20, 14, P.s6); b.rect(8, 7, 6, 7, P.m2); b.ellipse(11, 9, 1.8, 2, P.p3); lines(b, 16, 8, 8, 3); M.microText(b, 'III/4', 13, 14, P.r3); });
+IC.streifen=icon(function(b){ b.rect(4,6,23,4,P.w4); b.rect(7,14,21,4,P.w3); });
+IC.karten=icon(function(b){ paper(b,3,5,13,13,P.w4); paper(b,17,7,12,13,P.w5); b.ellipse(9,12,3,2,P.r2); b.rect(21,12,5,4,P.k2); for(var i=0;i<3;i++)b.vl(21+i*2,9,13,P.k2); });
 IC.vorlage = icon(function(b){ paper(b, 7, 3, 18, 19); b.rect(9, 7, 14, 6, P.s6); b.hl(9, 22, 7, P.k2); b.hl(9, 22, 12, P.k2); b.vl(9, 7, 12, P.k2); b.vl(22, 7, 12, P.k2); b.hl(11, 20, 9, P.r3); lines(b, 10, 15, 12, 3); });
 MA.icon = function(id){ var it = MA.ITEMS[id], key = id+'|'+(it && it.iconKey ? it.iconKey(MA.GS) : ''); if (CACHE[key]) return CACHE[key]; var fn = IC[(it && it.icon) || id] || IC.heft; var b = fn(); if (it && it.iconAfter) it.iconAfter(b, MA.GS); return (CACHE[key] = b); };
 MA.ICONS = IC;

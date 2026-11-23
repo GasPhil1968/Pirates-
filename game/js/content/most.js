@@ -44,6 +44,7 @@ async function nudge(A, ctx){ var D = A.npc('dragan');
   if (F('ball.out')){ await A.say('Der Ball ist oben. Das Gesims ist wieder nur ein Gesims.'); return; }
   if (!F('net.hung')){ await A.say('Bewegen könnte ich ihn. Wiederfinden wäre schwieriger.'); return; }
   if (!F('dragan.holds')){ await A.say('Das Netz hängt. Aber einer muss die Leine halten, sonst fängt es nur Luft.'); return; }
+  if (await A.puzzle('bergung') !== 'ok') return;
   await A.anim('reachL'); await A.say(ctx.item === 'fahne' ? 'Ich schubse den Ball mit dem Fahnenstock vom Gesims. Die Fahne hat ihren ersten Einsatz.' : 'Ich schubse den Ball mit dem Stecken vom Gesims.');
   await A.wait(300); A.set('ball.out'); A.set('net.hung', false); MA.touch(); await A.say('Er fällt – ins Netz.'); await A.say('Jetzt ziehen!');
   D.freeze(null); A.set('dragan.holds', false); await D.anim('pull');
@@ -69,10 +70,10 @@ MA.defineRoom({ id: 'most', name: 'Stari Most', width: K.W,
       on: { murmel: s15, ball: giveBall, netzleine: 'Erst muss das Netz hängen. Dann soll er halten.', zeitung: async function(A){ await A.npc('dragan').say('Behalt sie. Die Ergebnisse kenne ich auswendig.'); }, '*': async function(A){ await A.npc('dragan').say('Das kann man nicht kicken.'); } } },
     { id: 'ball', name: 'Dragans Ball', r: [K.ball[0]-5, K.ball[1]-5, 10, 10], st: [K.ball[0]+8, Math.round(deck(K.ball[0]+8))-3, 'L'], vis: function(S, G){ return !G.flags['ball.out']; },
       look: 'Dragans Ball, auf dem Gesims unter der Brüstung. Eine Armlänge zu weit. Darunter nichts als Luft und Neretva.',
-      take: 'Meine Arme sind zu kurz. Und die Neretva ist zu lang.', on: { stecken: nudge, fahne: nudge, netzleine: 'Das Netz gehört unter den Ball, nicht auf ihn.', '*': 'Damit erreiche ich ihn nicht.' } },
+      take: 'Meine Arme sind zu kurz. Und die Neretva ist zu lang.', on: { stecken: nudge, fahne: nudge, rohling:nudge, klebstab:nudge, netzleine: 'Das Netz gehört unter den Ball, nicht auf ihn.', '*': 'Damit erreiche ich ihn nicht.' } },
     { id: 'bruestung', name: 'Brüstung', r: function(){ return [150, Math.round(deck(200))-14, 140, 14]; }, pri: 4, st: [K.ball[0]+4, Math.round(deck(K.ball[0]+4))-3, 'R'],
-      look: function(A){ return A.say(F('net.hung') ? 'Über die Brüstung läuft die Leine, darunter hängt das Netz – genau unter dem Ball.' : 'Die Brüstung der Brücke, glatt gesessen von Jahrhunderten. Vor ihr das Gesims, darunter tief die Neretva.'); },
-      on: { netzleine: async function(A){ if (F('ball.out')){ await A.say('Der Ball ist schon oben.'); return; } if (F('net.hung')){ await A.say('Das Netz hängt schon.'); return; } await A.anim('reachL'); A.take('netzleine'); A.set('net.hung'); MA.touch(); await A.say('Ich lasse das Netz an der Leine über die Brüstung, bis es genau unter dem Ball hängt.'); await A.say('Jetzt muss einer die Leine halten.'); },
+      look: function(A){ return A.say(F('net.hung') ? 'Über die Brüstung läuft die Leine, darunter hängt das Netz – unter dem Gesims.' : 'Die Brüstung der Brücke, glatt gesessen von Jahrhunderten. Vor ihr das Gesims, darunter tief die Neretva.'); },
+      on: { netzleine: async function(A){ if (F('ball.out')){ await A.say('Der Ball ist schon oben.'); return; } if (F('net.hung')){ await A.say('Das Netz hängt schon.'); return; } await A.anim('reachL'); A.take('netzleine'); A.set('net.hung'); MA.touch(); await A.say('Ich lasse das Netz an der Leine über die Brüstung, bis es knapp unter dem Gesims hängt.'); await A.say('Jetzt muss einer die Leine halten.'); },
         netz: 'Ohne Leine fällt das Netz hinterher.', leine: 'Eine Leine allein fängt keinen Ball.', '*': 'Das lasse ich nicht über die Brüstung.' } },
     { id: 'gesims', name: 'Gesims', r: function(){ return [60, Math.round(deck(130)), 280, 4]; }, pri: 5, look: 'Ein schmaler Steinvorsprung unter der Brüstung. Für Bälle breit genug. Für Jungen nicht.' },
     { id: 'neretva', name: 'Neretva', r: [120, 116, 160, 28], look: 'Die Neretva. Wer hineinfällt, kommt erst weiter unten wieder heraus – wenn überhaupt.' },

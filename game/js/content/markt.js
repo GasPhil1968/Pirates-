@@ -34,6 +34,7 @@ async function maraRules(A){ var Ma = A.npc('mara'); await Ma.say('Jede Flasche 
 async function pack(A){ var Ma = A.npc('mara'), De = A.npc('dedo');
   if (!F('mara.job')){ await Ma.say('Erst fragst du, dann packst du.'); return; }
   if (F('packed')){ await Ma.say('Die Kiste ist gepackt.'); return; }
+  if (await A.puzzle('packplatz') !== 'ok') return;
   await A.anim('reachL'); A.take('einsatz'); await A.say('Einsatz in die Kiste, und jede Flasche an ihren Platz. Drei Reihen zu vier.'); MA.set('packed'); MA.touch();
   await Ma.say('Zwölf Flaschen.'); await A.say('Ich habe keine dazuerfunden.'); await Ma.say('Und keine kaputtgemacht.'); await A.say('Das war schwieriger.');
   await A.wait(600); await Ma.say('Der Einsatz sitzt. Beim Anheben bleibt alles stehen.');
@@ -41,7 +42,7 @@ async function pack(A){ var Ma = A.npc('mara'), De = A.npc('dedo');
   if (op.id === 0){ await Ma.say('Für diese Kiste.'); await A.say('Kann ich das schriftlich bekommen?'); await Ma.say('Du kannst Geld bekommen.'); await A.say('Das genügt vorläufig.'); }
   else { await Ma.say('Die Flaschen stehen besser.'); await A.say('Sie widersprechen weniger.'); await Ma.say('Dann hattest du gute Mitarbeiter.'); }
   await De.say('Für ein bisschen Karton ist das ordentlich bezahlt.'); await Ma.say('Für zwölf heile Flaschen.'); await De.say('Das hätte ich auch gekonnt.'); await Ma.say('Die nächste Kiste gehört dir.'); await De.say('Ich muss meinen Stand bewachen.'); await Ma.say('Dann bewach ihn etwas leiser.');
-  await Ma.say('Zähl nach.'); A.give('lohn'); A.give('klammern'); A.give('reste'); await A.say('Stimmt.'); await Ma.say('Dann sind wir uns einig.');
+  await Ma.say('Zähl nach.'); A.give('lohn'); A.give('klammern'); A.give('reste'); if (!F('probe.ok')) A.give('streifen'); A.set('cards.issued'); await A.say('Stimmt.'); await Ma.say('Dann sind wir uns einig.');
   await Ma.say('Die Reste und die vereinbarten Klammern kannst du behalten.'); await A.say('Auch die kleinen Stücke?'); await Ma.say('Gerade die. Große Stücke heben alle auf.');
   A.note('n_kiste', 'done'); A.save();
   await Ma.say('Und die Kiste muss noch zur Paradestraße, zu den Helfern hinter Jovans Sperre. Trägst du sie?'); await A.say('Für was?'); await Ma.say('Für mein Netz und meine Zugleine. Die brauche ich heute nicht mehr. Kiste und unterschriebener Schein zurück – dann gehören sie dir.');
@@ -82,6 +83,7 @@ async function dedoTalk(A){ var De = A.npc('dedo');
     { t: 'Mein Schuh bleibt unter deinem Tisch. Dafür bekomme ich den Stecken und die alte Befestigung.', if: A.has('schuh') && !F('table.fixed'), go: s13 },
     { t: 'Die Pfeife hätte ich gern.', if: !F('dedo.deal') && !F('ad.done'), go: async function(){ await De.say('Und womit mache ich dann Werbung?'); await A.say('Dein Stand steht mitten im Weg.'); await De.say('Das ist meine stille Werbung.'); A.set('pipe.asked'); } },
     { t: 'Ich kann dir bessere Werbung machen.', if: F('coat.known') && !F('dedo.deal'), go: s20 },
+    { t: 'Die Tafel gegen die Pfeife. Wie vereinbart.', if: F('ad.sold') && A.has('tafel'), go: exchangeSign },
     { t: 'Was brauchst du noch für die Pfeife?', if: F('dedo.deal') && !F('ad.done'), go: async function(){ await De.say('Ein Schild, ein passender Knopf, ein zahlender Kunde.'); await A.say('Du kannst zählen.'); await De.say('Nur, wenn es sich lohnt.'); } },
     { t: 'Was kosten die Knöpfe?', if: F('coat.known') && !F('ad.done'), once: 'de.kn', go: async function(){ await De.say('Für dich? Nichts. Du hast keinen Mantel. Für einen Mann mit Mantel: einen anständigen Preis.'); } },
     { t: 'Ich muss weiter.', bye: true }
@@ -114,11 +116,12 @@ async function s12(A){ var De = A.npc('dedo');
   if (A.first('!ix.shoe')){ var Ma = A.npc('mara'); await Ma.say('Du hast ihm wirklich den einzelnen Schuh verkauft?'); await De.say('Er wollte genau diesen.'); await Ma.say('Dann hat er etwas vor.'); await De.say('Das befürchte ich auch.'); } }
 async function s13(A){ var De = A.npc('dedo'); if (F('table.fixed')){ await De.say('Der Tisch steht. Der Schuh arbeitet.'); return; }
   await A.say('Mein Schuh bleibt unter deinem Tisch. Dafür bekomme ich den Stecken und die alte Befestigung.'); await De.say('Du kaufst einen Schuh und ziehst ihn einem Tisch an?'); await A.say('Der hat das kürzere Bein.'); await De.say('Und der Senkel?'); await A.say('Den brauche ich selbst.'); await De.say('Ohne Senkel läuft er nicht.'); await A.say('Der Tisch soll stehen.'); await De.say('Gut. Aber du nimmst den Stecken erst, wenn meine Ware liegen bleibt.');
+  if (await A.puzzle('tischfuss', {spoon: A.has('loeffel') || A.has('loeffel_k')}) !== 'ok') return;
   await A.anim('pickup'); A.take('schuh'); A.give('senkel'); A.set('table.fixed'); MA.touch(); await A.say('Senkel raus, Schuh unter das kurze Bein, Absatz nach oben. Der Tisch steht – mit und ohne Stecken.'); }
 async function takeStick(A){ var De = A.npc('dedo');
   if (F('stecken.taken')){ await A.say('Den Stecken habe ich schon.'); return; }
   if (!F('table.fixed')){ if (A.has('schuh')){ await De.say('Du wolltest einen Stecken. Jetzt bewegst du mein ganzes Geschäft.'); await A.say('Es ist noch alles da.'); await De.say('Halten möchte ich es trotzdem nicht den ganzen Nachmittag.'); } else await De.say('Stütze erst den Tisch. Ich stütze hier schon meinen Lebensunterhalt.'); return; }
-  await A.anim('pickup'); A.give('stecken'); A.set('stecken.taken'); MA.touch(); await A.say('Jetzt steht er.'); await De.say('Ein rechter Schuh am linken Tischbein.'); await A.say('Stört dich das?'); await De.say('Nur wenn der Tisch reklamiert.');
+  await A.anim('pickup'); A.give('stecken'); A.give('draht'); A.give('nagel'); A.set('table.parts'); A.set('stecken.taken'); MA.touch(); await A.say('Jetzt steht er.'); await De.say('Ein rechter Schuh am linken Tischbein.'); await A.say('Stört dich das?'); await De.say('Nur wenn der Tisch reklamiert.');
   await A.say('Die Befestigung gehört auch mir.'); await De.say('Vereinbart ist vereinbart. Leider erinnerst du dich gut.');
   if (A.first('!ix.table')){ var Ma = A.npc('mara'); await Ma.say('Dein Tisch steht besser.'); await De.say('Gute Ware zahlt sich aus.'); await Ma.say('Das war gerade noch dein Schuh.'); await De.say('Jetzt arbeitet er hier.'); } }
 async function s20(A){ var De = A.npc('dedo'); await A.say('Ich kann dir bessere Werbung machen.'); await De.say('Meine funktioniert. Du bist hier.');
@@ -135,7 +138,7 @@ MA.adScene = async function(A){ MA.E.cutscene = true;
   var J = A.spawn({ id: 'jasna', ch: 'jasna', x: 330, y: 124, f: 'L', hgt: 42 }), N = A.spawn({ id: 'nedim', ch: 'nedim', x: 346, y: 128, f: 'L', hgt: 40 });
   A.spawn({ id: 'kidA', ch: 'kidA', x: 362, y: 124, f: 'L', hgt: 42 }); A.spawn({ id: 'kidB', ch: 'kidB', x: 376, y: 129, f: 'L', hgt: 42 });
   A.cam(200); await A.fade(0, 320); var De = A.npc('dedo');
-  A.take('tafel'); A.set('tafel.placed'); MA.touch(); await A.say('Ich lehne die Tafel an Dedos Tisch. MANTELKNÖPFE, groß genug für jemanden, der einen braucht.');
+  A.set('tafel.placed'); MA.touch(); await A.say('Ich lehne die Tafel an Dedos Tisch. MANTELKNÖPFE, groß genug für jemanden, der einen braucht.');
   await J.say('Mantelknöpfe bei Dedo.'); await A.say('Auf mein Zeichen.'); await A.anim('wave');
   ['jasna', 'nedim', 'kidA', 'kidB'].forEach(function(k){ var a = MA.ACT[k]; if (a){ a.f = 'F'; a.idle = 'shout'; MA.setIdle(a); } });
   await A.kids('MANTELKNÖPFE BEI DEDO!'); await A.wait(400); ['jasna', 'nedim', 'kidA', 'kidB'].forEach(function(k){ var a = MA.ACT[k]; if (a){ a.f = 'L'; a.idle = null; MA.setIdle(a); } });
@@ -143,14 +146,20 @@ MA.adScene = async function(A){ MA.E.cutscene = true;
   await L.say('Ein gewöhnlicher Mantelknopf?'); await De.say('Vier Löcher. Dunkel.'); await L.say('Kein Frühstücksknopf des Schulgründers.'); await De.say('Der hat beim Frühstück seinen Mantel ausgezogen.'); await L.say('Du weißt genau, was ich meine.'); await De.say('Dann halten wir uns an die vier Löcher.');
   await A.say('Ich suche ihn aus.'); await A.puzzle('knopf', {});
   await A.say('Der passt.'); await L.say('Tatsächlich.'); await De.say('Ihr Schüler kennt sich aus.'); await L.say('Er sieht genau hin.'); await De.say('Das ist mir bereits teuer zu stehen gekommen.');
-  await A.wait(500); await L.say('Diesmal stimmt die Beschreibung.'); await De.say('Das erleichtert uns beiden den Nachmittag.');
-  await A.say('Der Kunde hat bezahlt. Die Tafel bleibt. Jetzt die Pfeife.'); await De.say('Die Kinder bleiben nicht?'); await A.say('Nein.'); await De.say('Dann sind wir uns einig.');
-  A.give('pfeife'); A.set('ad.done'); A.note('n_pfeife', 'done'); A.note('n_knopf', 'done'); MA.touch();
+  await L.anim('give'); await De.anim('reachM'); await L.say('Ein Dinar. Zähl ihn ruhig.'); await De.say('Bei einem genügt mir ein Blick.'); await A.wait(500); await L.say('Diesmal stimmt die Beschreibung.'); await De.say('Das erleichtert uns beiden den Nachmittag.');
+  await A.say('Der Kunde hat bezahlt.'); await De.say('Für den Knopf. Und das Schild? Das war unser Geschäft.');
+  A.set('ad.sold'); A.set('tafel.placed', false); A.note('n_knopf', 'done'); MA.touch();
   await N.say('Haben wir jetzt für Dedo gearbeitet?'); await J.say('Wir haben geübt.'); await N.say('Für Dedo.'); await A.say('Und es hat funktioniert.');
   var Ma = A.npc('mara'); await Ma.say('Ein zahlender Kunde. Ganz ohne Pfeifen.'); await De.say('Ich erweitere meine Methoden.'); await Ma.say('Der Junge erweitert deine Methoden.'); await De.say('Ich lasse mich erweitern.');
   await A.fade(1, 320); ['jasna', 'nedim', 'kidA', 'kidB', 'lehrer'].forEach(function(k){ A.despawn(k); }); A.cam(null); MA.loadRoom('markt'); A.place(296, 126, 'L'); await A.fade(0, 320);
   await A.say('Die Klasse geht zurück zur Schule. Der Lehrer hält seinen Mantel nicht mehr zu.'); A.save(); };
 
+async function exchangeSign(A){ var D=A.npc('dedo');
+  if (!A.has('tafel') || !F('ad.sold')) return;
+  A.take('tafel'); A.give('pfeife'); A.set('tafel.placed'); A.set('ad.done'); A.note('n_pfeife','done');
+  await A.say('Die Schrift ist von mir. Den Kunden hast du schon. Jetzt gehört dir auch das Schild.');
+  await D.say('Und dir die Pfeife. Wenn du damit Werbung machst, geh bitte zwei Straßen weiter.'); A.save();
+}
 // ---------------------------------------------------------------- Raum
 function crateExit(to){ return { to: to, can: function(A){ return MA.crateCheck(A); } }; }
 MA.defineRoom({ id: 'markt', name: 'Markt', width: K.W,
@@ -170,12 +179,12 @@ MA.defineRoom({ id: 'markt', name: 'Markt', width: K.W,
       look: function(A){ return A.say(F('packed') ? (F('crate.back') ? 'Maras Kiste. Leer und zufrieden.' : 'Die gepackte Kiste. Zwölf Flaschen, jede an ihrem Platz.') : 'Eine Holzkiste. Zwölf Flaschen passen hinein, drei Reihen zu vier – wenn sie sich nicht drängeln. So schlagen sie gegeneinander.'); },
       take: async function(A){ if (F('delivery.job') && !A.has('kiste') && !F('delivered')){ if (F('sandal') === 'broken'){ await A.say('Mit der Sandale? Erst der Fuß, dann die Flaschen.'); return; } if (F('sandal') === 'fixed'){ await sandalOk(A); return; } A.give('kiste'); A.set('crate.carry'); MA.touch(); await A.say('Ich nehme die Kiste.'); return; }
         if (F('packed') && !F('delivery.job')){ await A.npc('mara').say('Erst sagst du, dass du sie trägst. Dann trägst du sie.'); return; } await A.say('Die Kiste gehört Mara. Und ohne Einsatz klappert sie.'); },
-      on: { einsatz: pack, karton: 'Ein flacher Karton trennt nichts. Er bräuchte Löcher an den richtigen Stellen.', raster: 'Das Raster stimmt. Aber ohne die Löcher ist es noch kein Einsatz.', '*': 'Das gehört nicht in Maras Kiste.' } },
+      on: { einsatz: pack, karton: 'Ein flacher Karton trennt nichts. Er bräuchte Trennwände.', raster: 'Das Raster stimmt. Aber der Karton ist noch in einem Stück.', '*': 'Das gehört nicht in Maras Kiste.' } },
     { id: 'flaschen', name: 'Flaschen', r: K.bottles, look: 'Zwölf Flaschen für die Parade. Dunkelgrünes Glas, das gern klirrt.', take: async function(A){ await A.npc('mara').say('Die Flaschen bleiben, bis sie eine Verpackung haben.'); } },
     { id: 'karton', name: 'Packkarton', r: function(S, G){ return G.flags['karton.given'] ? [118, 102, 18, 14] : K.karton; }, look: 'Flacher Packkarton, an den Stand gelehnt.', take: async function(A){ if (!F('mara.job')){ await A.npc('mara').say('Der Karton gehört zur Arbeit. Erst die Arbeit.'); return; } await A.npc('mara').say('Du hast schon ein Stück. Mehr Karton macht keine bessere Kiste.'); } },
     { id: 'dedo', npc: 'dedo', hgt: 50, talk: dedoTalk, look: 'Dedo Muratović. Fes, Schnurrbart, und für jeden Gegenstand eine Geschichte.',
       on: { schuh: s13, abrieb: async function(A){ if (F('plakette.read')) return s11(A); await A.npc('dedo').say('Eine Jahreszahl allein widerlegt keine Geschichte.'); await A.say('Sie kann sie ziemlich kurz machen.'); await A.npc('dedo').say('Dann fehlt dir noch der Rest.'); },
-        lohn: s12, tafel: async function(A){ if (!F('dedo.deal')) return s20(A); await A.npc('dedo').say('Ein Schild allein verkauft nichts. Bring Leute, die rufen, und einen, der kauft.'); },
+        lohn: s12, tafel: async function(A){ if (F('ad.sold')) return exchangeSign(A); if (!F('dedo.deal')) return s20(A); await A.npc('dedo').say('Ein Schild allein verkauft nichts. Bring Leute, die rufen, und einen, der kauft.'); },
         skizze: async function(A){ await A.npc('dedo').say('Dunkel, vier Löcher. Habe ich. Wer kauft ihn?'); }, '*': async function(A){ await A.npc('dedo').say('Das kaufe ich nicht. Ich verkaufe.'); } } },
     { id: 'tisch', name: 'Dedos Tisch', r: [222, 94, 90, 20], pri: 3, st: [236, 122, 'B'],
       look: function(A){ return A.say(F('table.fixed') ? 'Dedos Tisch steht jetzt auf einem rechten Schuh. Gerade wie nie.' : 'Dedos Tisch. Das linke Bein ist zu kurz; darunter klemmt ein Stecken, mit Draht und einem Nagel festgemacht. Hält. Gerade so.'); },

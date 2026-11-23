@@ -13,7 +13,11 @@ MA.loadEnv = function(env){ var G = MA.validate(env.GS || {}); if (!G) return fa
     UI.hideChoices(); UI.hideSpeech(); UI.closeVerbs(); MA.loadRoom(G.room); E.screen = 'game'; $('fade').style.opacity = '0';
     if (MA.onLoaded) MA.onLoaded(G); UI.refreshBar(); return true; }
   catch(e){ console.error(e); MA.GS = prev; return false; } };
-MA.travel = async function(loc){ if (E.busy || E.transit) return; E.transit = true; try { await MA.gotoRoom(loc.room, { from: 'map', x: loc.entry ? loc.entry[0] : undefined, y: loc.entry ? loc.entry[1] : undefined, f: loc.entry ? loc.entry[2] : undefined }); } finally { E.transit = false; } };
+MA.travel = async function(loc){ if (E.busy || E.transit) return; E.transit = true; try {
+  if (E.room.id === 'markt' && MA.has('kiste') && MA.flag('sandal') !== 'fixed'){
+    await MA.scene(function(){return MA.crateCheck(MA.A);}); return;
+  }
+  await MA.gotoRoom(loc.room, { from: 'map', x: loc.entry ? loc.entry[0] : undefined, y: loc.entry ? loc.entry[1] : undefined, f: loc.entry ? loc.entry[2] : undefined }); } finally { E.transit = false; } };
 
 // ---------------------------------------------------------------- Eingabe in der Szene
 var lastTap = { t: 0, id: null }, downAt = null;

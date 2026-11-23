@@ -94,7 +94,7 @@ UI.openControls = function(){ var p = panel('Steuerung'), m;
 UI.openAbout = function(){ var p = panel('Über das Spiel'), m;
   ['<b>M. Adventure</b> erzählt die Lebensgeschichte von M., geboren 1942 in einem armen Dorf in Bosnien-Herzegowina. Diese Fassung enthält das Kapitel <b>Mostar 1955 – „Der Genosse kommt!“</b> als eigenständig spielbaren Abschnitt.',
    'Grundlage: das Spielkonzept „M Adventure“ (Figuren, Drehbuch S01–S35). Bild- und Bedienungssprache nach der Referenz MALA („Die Stillen“); Palette, Malkasten und Figuren-Rig sind technisch übernommen.',
-   'Ohne Ton und ohne Video, wie im Konzept für die Browserfassung vorgesehen. Nach dem Kapitel geht es zurück zum Hauptmenü.',
+   'Ohne Ton und ohne Video, wie im Konzept für die Browserfassung vorgesehen. Nach der Parade führt die Erinnerung zurück nach Podaca.',
    'Fassung '+esc(MA.BUILD)+' · v'+esc(MA.VERSION)].forEach(function(s){ p.appendChild(el('p', '', s)); });
   p.appendChild(btn('Zurück', function(){ UI.popModal(m); }, 'back')); m = UI.pushModal(p, { cls: 'wide', kind: 'about', x: true }); };
 
@@ -117,11 +117,12 @@ UI.openMap = function(){ if (E.screen !== 'game' || UI.modal() || E.busy) return
   var cv = el('canvas', 'mapc'); cv.width = 320; cv.height = 144; if (MA.paintMap) UI.paintBuf(cv, MA.paintMap(MA.GS)); mw.appendChild(cv);
   var layer = el('div', 'maplocs'); mw.appendChild(layer);
   var here = MA.GS.room, hereLoc = MA.MAP.locs.filter(function(l){ return l.room === here || (l.rooms && l.rooms.indexOf(here) >= 0); })[0];
+  var pendingDelivery = here === 'parade' && MA.flag('delivery.access') && !MA.flag('delivered');
   var indoor = E.room && E.room.indoor;
   var msg = el('div', 'mapmsg', indoor ? 'Von drinnen zeigt der Plan nur, wo ich bin.' : 'Wohin? Ein Ort genügt.');
   MA.MAP.locs.forEach(function(l){ if (!l.known(MA.GS)) return; var isHere = l === hereLoc, open = l.open ? l.open(MA.GS) : true;
     var b = el('button', 'mloc'+(isHere ? ' here' : '')+(open === true ? '' : ' locked'), '<i></i><span>'+esc(l.name)+'</span>'); b.style.left = (l.x/320*100)+'%'; b.style.top = (l.y/144*100)+'%';
-    b.onclick = async function(){ if (isHere){ msg.textContent = 'Hier bin ich.'; return; } if (indoor){ msg.textContent = 'Erst muss ich nach draußen.'; return; } if (open !== true){ msg.textContent = open; return; }
+    b.onclick = async function(){ if (isHere){ msg.textContent = 'Hier bin ich.'; return; } if (pendingDelivery){msg.textContent='Die Lieferung ist noch offen. Mara braucht den unterschriebenen Schein.';return;} if (indoor){ msg.textContent = 'Erst muss ich nach draußen.'; return; } if (open !== true){ msg.textContent = open; return; }
       UI.popModal(m); await MA.travel(l); };
     layer.appendChild(b); });
   var foot = el('div', 'mapfoot'); foot.appendChild(msg); foot.appendChild(el('div', 'legend', '◉ hier · ◌ bekannt · 🔒 noch nicht')); foot.appendChild(btn('Schließen', function(){ UI.popModal(m); }, 'back mini')); p.appendChild(foot);
@@ -135,7 +136,7 @@ UI.openDoc = function(d){ return new Promise(function(res){ var p = panel(d.titl
   m = UI.pushModal(p, { cls: 'doc '+(d.cls || ''), kind: 'doc', onClose: function(){ res(); } }); }); };
 
 // ---------------------------------------------------------------- Erzählkarte (Kapitelbeginn, Abschluss)
-UI.showCard = function(c){ return new Promise(function(res){ var p = el('div', 'card'), m; if (c.kicker) p.appendChild(el('div', 'ck', esc(c.kicker))); if (c.title) p.appendChild(el('div', 'ctt', esc(c.title))); if (c.text) (Array.isArray(c.text) ? c.text : [c.text]).forEach(function(t){ p.appendChild(el('p', 'cx', esc(t))); });
+UI.showCard = function(c){ return new Promise(function(res){ var p = el('div', 'card'), m; if (c.art){ var art = el('canvas','memory-art'); UI.paintBuf(art,c.art()); art.setAttribute('role','img'); art.setAttribute('aria-label',c.alt || ''); p.appendChild(art); } if (c.kicker) p.appendChild(el('div', 'ck', esc(c.kicker))); if (c.title) p.appendChild(el('div', 'ctt', esc(c.title))); if (c.text) (Array.isArray(c.text) ? c.text : [c.text]).forEach(function(t){ p.appendChild(el('p', 'cx', esc(t))); });
   p.appendChild(el('div', 'cmore', 'Weiter ▸')); var t0 = Date.now(); p.onclick = function(){ if (Date.now()-t0 > 350) UI.popModal(m); };
   m = UI.pushModal(p, { cls: 'full cardm', kind: 'card', onClose: function(){ res(); } }); }); };
 

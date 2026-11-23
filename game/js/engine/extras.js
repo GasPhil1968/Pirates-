@@ -78,6 +78,8 @@ function drawCat(fb, c, cam){ var x = Math.round(c.x-cam), y = Math.round(c.y), 
   var tx = x-4*f; if (sit){ px(tx, by+1, O); px(tx-f, by+2, O); px(tx-2*f, by+2, D); }
   else { var wag = Math.floor(c.t/300) % 2; px(tx, by-1, O); px(tx-f, by-2-wag, O); px(tx-f, by-3-wag, D); } }
 
+MA.drawTerraceCat = function(b){ drawCat(b,{x:274,y:65,f:"L",st:"sit",t:0},0); };
+
 // ---------------------------------------------------------------- Passanten
 function newWalker(){ var c = X.cfg.walkers, r = E.room, dir = Math.random() < 0.5 ? 1 : -1, y = pick(c.lanes);
   var ch = pick(c.chars); if (!M.CHARS[ch]) return null;

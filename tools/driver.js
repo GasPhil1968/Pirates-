@@ -22,6 +22,7 @@ class Driver {
   async close() { await this.browser.close(); }
   async st() { return this.page.evaluate(() => MADV.state()); }
   async flags() { return this.page.evaluate(() => MADV.flags()); }
+  async flag(k) { return (await this.flags())[k]; }
   async tap(x, y) { if (this.touch) await this.page.touchscreen.tap(x, y); else await this.page.mouse.click(x, y); }
   // DOM-Element bedienen: mit dem Finger antippen (Touch-Gerät) bzw. mit der Maus klicken
   async press(loc) { if (this.touch) await loc.tap(); else await loc.click(); }
@@ -68,7 +69,7 @@ class Driver {
     await this.press(b.first()); await this.page.waitForTimeout(200); return this.idle(); }
   async exit(id, room) { await this.idle(); await this.clickHs(id); await this.page.waitForTimeout(300); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Ausgang ${id}: erwartet ${room}, bin in ${s.room}`); return s; }
   async mapTo(name, room) { await this.idle(); await this.press(this.page.locator('#b-map')); await this.page.waitForTimeout(400); await this.press(this.page.locator('.mloc', { hasText: name }).first()); await this.page.waitForTimeout(500); const s = await this.idle(); if (room && s.room !== room) throw new Error(`Karte ${name}: erwartet ${room}, bin in ${s.room}`); return s; }
-  async puzzle(...labels) { for (const l of labels) { const b = this.page.locator('.puzzle .pb', { hasText: l }); if (!(await b.count())) { const all = await this.page.locator('.puzzle .pb').allTextContents(); throw new Error(`Rätselknopf "${l}" fehlt: ${all.join(' / ')}`); } await this.press(b.first()); await this.page.waitForTimeout(260); } await this.page.waitForTimeout(1900); return this.idle(); }
+  async puzzle(...labels) { for (const l of labels) { const b = this.page.locator('.puzzle .pb', { hasText: l }); if (!(await b.count())) { const all = await this.page.locator('.puzzle .pb').allTextContents(); throw new Error(`Rätselknopf "${l}" fehlt: ${all.join(' / ')}`); } await this.press(b.first()); await this.page.waitForTimeout(260); const ps = this.page.locator('.puzzle .psay'); if (await ps.count()) this.log.push('[rätsel] ' + (await ps.first().textContent())); } await this.page.waitForTimeout(1900); return this.idle(); }
   async closeDoc() { const s = await this.st(); if (s.modal === 'doc') { await this.press(this.page.locator('.modal.doc .row.back')); await this.page.waitForTimeout(250); } return this.idle(); }
   async expectFlag(k, v = true) { const f = await this.flags(); if ((v === true && !f[k]) || (v !== true && f[k] !== v)) throw new Error(`Flag ${k} erwartet ${v}, ist ${f[k]}`); }
   async expectItem(i, has = true) { const s = await this.st(); if (has !== s.inv.includes(i)) throw new Error(`Gegenstand ${i} ${has ? 'fehlt' : 'unerwartet vorhanden'} (${s.inv.join(', ')})`); }

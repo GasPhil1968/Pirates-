@@ -231,3 +231,11 @@ button:focus{ outline:none; } button:focus-visible{ outline:calc(var(--u)*1) sol
 #rotate button{ margin-top:12px; padding:12px 20px; border:2px solid var(--y2); color:var(--y4); background:var(--k1); font:inherit; }
 body.busy #scene{ cursor:default !important; }
 @media (prefers-reduced-motion: reduce){ #bar .slot.new{ animation:none; } #speech .more{ animation:none; } }
+/* Große, scharf skalierte Nahansichten im vorhandenen Bühnenrahmen. */
+.puzzle{overflow-y:auto; overscroll-behavior:contain;}
+.puzzle .pc{width:min(96%,calc(var(--u)*245),81vh);height:auto;max-width:100%;flex-shrink:0;}
+.puzzle .psay{font-size:clamp(13px,calc(var(--u)*5.3),21px);line-height:1.25;min-height:2.5em;}
+#stage.t .puzzle .pb{min-width:44px;}
+@media(max-height:500px){.puzzle .ptitle{padding:2px}.puzzle .psay{padding:3px 12px}.puzzle .pc{width:min(82vh,65%)}.puzzle .pbtns{gap:3px}}
+.card:has(.memory-art){max-width:min(90%,calc(var(--u)*240));padding:calc(var(--u)*3);font-size:clamp(14px,calc(var(--u)*7),24px);}
+.memory-art{display:block;image-rendering:pixelated;width:100%;max-height:35vh;object-fit:contain;margin:0 auto .55em;}
