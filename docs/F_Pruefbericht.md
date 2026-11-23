@@ -1,6 +1,6 @@
 # F1. Prüfbericht – Kapitel Mostar 1955
 
-Stand 11.11.2026, Fassung siehe Titelbild bzw. `MA.BUILD` in `game/js/engine/core.js`. Geprüft in der Arbeitsumgebung (Linux-Container) mit dem vorinstallierten Chromium über Playwright. **Echte Geräte, Safari/WebKit und Firefox wurden nicht geprüft**, und es gab keine Spieltests mit Menschen.
+Stand 23.11.2026 (Fassung 1.1 mit den neuen Rätseln, Abschnitt 2b), Fassung siehe Titelbild bzw. `MA.BUILD` in `game/js/engine/core.js`. Geprüft in der Arbeitsumgebung (Linux-Container) mit dem vorinstallierten Chromium über Playwright. **Echte Geräte, Safari/WebKit und Firefox wurden nicht geprüft**, und es gab keine Spieltests mit Menschen.
 
 ## 1. Methode
 
@@ -12,10 +12,10 @@ Der Lesezugang `window.MADV` liefert nur Positionen und Zustände zum Prüfen; e
 
 | Lauf | Ansicht | Inhalt | Ergebnis |
 | --- | --- | --- | --- |
-| Durchlauf A `tools/playthrough.js` | Desktop 1280×800, Maus | kompletter Weg Titel → Abschlussbild → Hauptmenü; dazu Fehlversuche (Kohlepapier ohne Verschieben, zu frühe Unterschrift, falscher Knopf, falsches Signal, „Ich heiße M.“) und Speichern auf Platz 1 vor dem Finale | **bestanden**, 42/42 Schritte, keine Browserfehler |
-| Durchlauf A | „iPhone 13 landscape“ (Touch-Emulation, 750×342, Seitenleisten-Layout) | derselbe Weg mit Fingertipps (auch Inventar, Antworten und Menüs getippt) | **bestanden**, 42/42 Schritte, keine Browserfehler |
-| Durchlauf A | „iPad (gen 7) landscape“ (Touch-Emulation, 1080×810, Standardlayout) | derselbe Weg mit Fingertipps | **bestanden**, 42/42 Schritte, keine Browserfehler |
-| Durchlauf B `tools/playthrough_b.js` | Desktop 1280×800 | andere Reihenfolge, rund 30 Fehlversuche, richtiges Signal zu früh (wird verweigert), Ball mit der Fahne statt dem Stecken, Speichern auf Platz 2 → Seite neu laden → Platz 2 laden (Raum, Inventar, Zustand verglichen), „Fortsetzen“ über das Titelbild mit Rückblick „Zuletzt“ | **bestanden**, 29/29 Schritte, 751 Dialogzeilen, keine Browserfehler |
+| Durchlauf A `tools/playthrough.js` | Desktop 1280×800, Maus | kompletter Weg Titel → Abschlussbild → Hauptmenü; dazu Fehlversuche (Kohlepapier ohne Verschieben, zu frühe Unterschrift, falscher Knopf, falsches Signal, „Ich heiße M.“) und Speichern auf Platz 1 vor dem Finale | **bestanden**, 44/44 Schritte (Fassung 1.1), keine Browserfehler |
+| Durchlauf A | „iPhone 13 landscape“ (Touch-Emulation, 750×342, Seitenleisten-Layout) | derselbe Weg mit Fingertipps (auch Inventar, Antworten und Menüs getippt) | **bestanden**, 44/44 Schritte (Fassung 1.1), keine Browserfehler |
+| Durchlauf A | „iPad (gen 7) landscape“ (Touch-Emulation, 1080×810, Standardlayout) | derselbe Weg mit Fingertipps | IPAD |
+| Durchlauf B `tools/playthrough_b.js` | Desktop 1280×800 | andere Reihenfolge, rund 30 Fehlversuche, richtiges Signal zu früh (wird verweigert), Ball mit der Fahne statt dem Stecken, Speichern auf Platz 2 → Seite neu laden → Platz 2 laden (Raum, Inventar, Zustand verglichen), „Fortsetzen“ über das Titelbild mit Rückblick „Zuletzt“ | **bestanden**, 29/29 Schritte (Fassung 1.1), 818 Dialogzeilen, keine Browserfehler |
 | Layoutprüfung `tools/layout_check.js` | 8 Profile: Desktop 1280×800 und 1024×640, iPad (7. Gen.) quer, Galaxy S24 quer, iPhone 16 Pro Max quer, iPhone 13 quer, iPhone SE quer, iPhone 13 hoch | Titel, Verben, Gespräch, Gegenstandswahl, Notizen, Karte, Menü, Einstellungen, Rätsel. Per DOM geprüft: Knöpfe innerhalb der Bühne, abgeschnittene Beschriftungen, Tippflächen unter 24 px, sichtbarer Schließen-Knopf | erster Lauf: viele Befunde auf Telefonen und Tablet (Abschnitt 3); nach den Korrekturen **ohne Befund** auf allen 8 Profilen, keine Browserfehler |
 | Karte `tools/map_check.js` | Desktop | nur bekannte Orte sichtbar; „Stari Most“ nach Nedims Hinweis bekannt, aber ohne Auftrag gesperrt mit Grund; aus Innenräumen keine Reise; mit Auftrag Markt und Brücke offen, Sperre/Paradestraße weiter unbekannt; Reise über die Karte | **bestanden**, 10/10 Prüfungen |
 | Offline | Chromium, Ursprung 127.0.0.2 | Service Worker installiert, „Offline bereit ✓“, Neuladen ohne Netz (Titel, Schrift, neues Spiel), neue Fassung wird auf dem Titelbild übernommen, alter Cache gelöscht | **bestanden** |
@@ -89,6 +89,30 @@ Auf Rückmeldung („zu wenig Details, Hauptfigur zu steif, Figuren ohne Eigenle
 
 Danach liefen alle Prüfungen aus Abschnitt 1 erneut. Die Ergebnisse dort gelten für diesen Stand.
 
+## 2b. Fassung 1.1: neue Rätsel (dritte Runde)
+
+Die Rätsel der Fassung 1.1 stammen aus einer vom Nutzer gelieferten Einzelseite (`M_Adventure_Mostar_1955.html`). Die Skripte daraus wurden unverändert in die Projektdateien zurückgeführt. Neu sind `content/werkbank.js` (Nahansichten), `content/hinterhof.js` (neuer Ort) und `art/podaca.js` (Erinnerungsbild). Eingetragen wurden sie in `index.html`, das Zusatz-CSS steht in `game.css`. Geprüft wurde: Eine aus dem Projekt neu gebaute Artefakt-Seite enthält genau dieselben Skripte wie die gelieferte Datei.
+
+Inhaltlich neu:
+- **Nahansichten:** Zuschnitt (2 lange und 3 kurze Stege), Packplatz (Stege in der richtigen Richtung, dann Flaschen), Tischfuß (Senkel, Schuh, Nagel mit dem Löffelhals, Draht), Rinne (Löffel umsetzen) und Bergung (Netz unter die Scharte).
+- **Probe:** Sie gelingt erst mit den Ruf- und Pausenkarten, gemalt aus den Kartonstreifen vom Packen. Die Schulglocke im Hof startet die Wiederholung ebenfalls.
+- **Sandale:** Sie wird mit Nagel und Drahtöse geflickt.
+- **Tor:** Es wird im neuen Hinterhof in die Offenrast gedrückt.
+- **Kleister:** Den gibt es erst nach dem Sportteil, aus dem Eimer.
+- **Fahne:** Zeitung, Stecken und Kleister lassen sich in beliebiger Reihenfolge zusammensetzen.
+- **Pfeife:** Dedo gibt sie erst im Tausch gegen die Werbetafel heraus.
+- **Pfiffsignal:** Es schickt Jovan nur nach vorn, Dragan wird danach angesprochen.
+- **Lieferung:** Die Unterschrift muss eigens abgeholt werden.
+- **Finale:** Den Platz III/4 betritt man selbst, danach folgt das Erinnerungsbild „Podaca · 2018“.
+- **Alte Spielstände:** Gespeicherte Stände der Fassung 1.0 werden beim Laden um Streifen, Draht und Nagel ergänzt. Das ist im Code nachgelesen, aber nicht mit einem echten alten Spielstand geprüft.
+
+Beide Durchläufe wurden auf den neuen Weg umgeschrieben. Sie spielen jede neue Nahansicht über die Rätselknöpfe, auch mit Fehlversuchen: zu viele oder zu wenige Stege, falsche Richtung, Flaschen zu früh, Nagel zu früh, Löffel auf der falschen Seite, Netz an der falschen Stelle. Der Testfahrer schreibt jetzt auch die Rückmeldungen der Nahansichten mit.
+
+Befund aus den Läufen:
+- Die Fehlschläge in den ersten Läufen kamen alle vom Testskript (Zähler im Zuschnitt läuft nach 4 auf 0, ein fehlender Schritt), nicht vom Spiel.
+- Die **Passage** an der Sperre lässt sich nicht *benutzen*, solange Dragan davor steht: Der Tipp trifft ihn. Das ist keine Sackgasse, weil *Dragan ansprechen* dieselbe Flucht auslöst. Der alternative Weg über die Passage ist damit aber praktisch nicht erreichbar.
+- Die Kartenprüfung ist bestanden (10/10). Layoutprüfung: LAYOUT.
+
 ## 3. Gefundene und behobene Fehler
 
 | Befund | Behebung |
@@ -123,7 +147,7 @@ Nach jeder Korrektur wurden die betroffenen Abläufe erneut durchlaufen. Die Erg
 
 - **Geräte:** Keine Tests auf echten iPhones, iPads oder Android-Geräten; nur Chromium-Emulation (Viewport, Pixeldichte, Touch-Ereignisse). Nicht geprüft: Safari/WebKit (auch „Zum Home-Bildschirm“, Safe-Area auf Geräten mit Notch) und Firefox. Tastaturbedienung nur stichprobenartig (Esc, Ziffern).
 - **Sehr kleine Telefone** (568×320 CSS-px, iPhone SE 1. Generation): Standardlayout mit etwa 27 px hohen Knöpfen statt der Seitenleisten.
-- **Spieldauer:** 1½–2½ Stunden ist eine Schätzung. Die automatischen Läufe (11–16 Minuten bei schnellem Text, ohne Nachdenken) sagen darüber nichts aus.
+- **Spieldauer:** 1½–2½ Stunden ist eine Schätzung. Die automatischen Läufe (in Fassung 1.1 über 15 Minuten bei schnellem Text, ohne Nachdenken) sagen darüber nichts aus.
 - **Ton:** keiner, wie im Konzept für die Browserfassung vorgesehen.
 - **Grafik:**
   - Hintergründe, Figuren und Symbole sind mit der MALA-Technik in der MALA-Palette gezeichnet: Code-Malerei mit festen Figuren-Sprites aus dem Rig, keine Platzhalter.
