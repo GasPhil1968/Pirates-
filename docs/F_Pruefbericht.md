@@ -20,7 +20,7 @@ Der Lesezugang `window.MADV` liefert nur Positionen und Zustände zum Prüfen; e
 | Karte `tools/map_check.js` | Desktop | nur bekannte Orte sichtbar; „Stari Most“ nach Nedims Hinweis bekannt, aber ohne Auftrag gesperrt mit Grund; aus Innenräumen keine Reise; mit Auftrag Markt und Brücke offen, Sperre/Paradestraße weiter unbekannt; Reise über die Karte | **bestanden**, 10/10 Prüfungen |
 | Offline | Chromium, Ursprung 127.0.0.2 | Service Worker installiert, „Offline bereit ✓“, Neuladen ohne Netz (Titel, Schrift, neues Spiel), neue Fassung wird auf dem Titelbild übernommen, alter Cache gelöscht | **bestanden** |
 | Start über `file://` | Chromium | Titelbild, Pixelschrift geladen, neues Spiel startet | **bestanden** |
-| Ausgeliefertes ZIP | entpackt, eigener Server | Fassung im Titel, alle 43 Einträge des Service Workers abrufbar (HTTP 200), keine fehlerhaften Antworten, neues Spiel startet | **bestanden** |
+| Ausgeliefertes ZIP | entpackt, eigener Server | Fassung im Titel, alle 52 Einträge des Service Workers abrufbar (HTTP 200, Fassung 1.1), keine fehlerhaften Antworten, neues Spiel startet | **bestanden** |
 
 Zeitliche Einordnung: Alle Läufe wurden nach der Überarbeitung von Grafik, Bewegung und Eigenleben (Abschnitt 2a) wiederholt, mit unveränderten Ergebnissen: A Desktop, iPhone und iPad je 42/42, B 29/29, Karte 10/10, Layout ohne Befund, keine Browserfehler.
 Der Desktop-Durchlauf A, die Kartenprüfung und die Layoutprüfung liefen zuletzt auf dem ausgelieferten Stand. iPhone, iPad und B liefen kurz davor, vor einer kleinen Korrektur der Lehrerposition im Klassenzimmer.
@@ -112,6 +112,7 @@ Befund aus den Läufen:
 - Die Fehlschläge in den ersten Läufen kamen alle vom Testskript (Zähler im Zuschnitt läuft nach 4 auf 0, ein fehlender Schritt), nicht vom Spiel.
 - Die **Passage** an der Sperre lässt sich nicht *benutzen*, solange Dragan davor steht: Der Tipp trifft ihn. Das ist keine Sackgasse, weil *Dragan ansprechen* dieselbe Flucht auslöst. Der alternative Weg über die Passage ist damit aber praktisch nicht erreichbar.
 - Die Kartenprüfung ist bestanden (10/10). Layoutprüfung auf acht Profilen: ohne Befund.
+- Nach der Korrektur wiederholt: Durchlauf A auf „iPhone 13 landscape“ 44/44 und Layoutprüfung ohne Befund. Entpacktes ZIP und Artefakt-Seite starten ohne Browserfehler.
 - **Gefunden und behoben:** Die Layoutprüfung erfasst keine Nahansichten. Deshalb wurden die neuen Nahansichten zusätzlich auf „iPhone 13 landscape“ und „iPhone SE landscape“ vermessen. Ergebnis: Die Nahansicht war dort 194 px hoch, ihr Inhalt 228 px. Die Knöpfe lagen fast ganz unter dem Rand, die Beschriftung war nicht zu sehen; erreichbar waren sie nur durch Scrollen. Behoben in `game.css` für flache Bühnen (`#stage.short`): Das Bild wird so weit verkleinert, dass Titel, Text und Knöpfe ohne Scrollen passen; das Seitenverhältnis bleibt, damit die Tippkoordinaten stimmen. Nachgemessen: Inhalt 194 von 194 px. iPad und Desktop sind unverändert.
 
 ## 3. Gefundene und behobene Fehler
